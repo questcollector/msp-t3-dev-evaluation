@@ -73,8 +73,8 @@ spring:
       on-profile: "dev"
   data:
     mongodb:
-      username: ${MONGO_USER}
-      password: ${MONGO_PASSWORD}
+      username: ${MONGO_USER:eval}
+      password: ${MONGO_PASSWORD:random}
 
 ---
 

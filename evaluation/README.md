@@ -1,21 +1,17 @@
-# 실습 과제 평가용 스택
+# Evaluation 서비스
 
-## instance userdata.txt
-- ubuntu ec2
-- docker, docker-compose 설치
-- ecr image 권한
+## Spring webflux with Kotlin
 
-## init-settings.sh
-환경 변수, 초기 상태에 대한 설정파일
+## 로컬에서 구동 시
 
-## docker-compose.yml
-docker-compose 정의 파일
-
-## rabbitmq 라우팅 키 설정
-아래의 바인드에 대해 삭제 후 라우팅 키를 지정하지 않음
-
-|exchange|queue|
-|--|--|
-|campaignAddedEvent|campaignAddedEvent.notification|
-|notificationSuccessEvent|notificationSuceessEvent.marketing|
-|notificationFailedEvent|notificationFailedEvent.marketing|
+1. gradlew build
+2. rabbitmq 구성
+   - rabbitmq:management 이미지
+   - Administrator 권한의 admin/admin 계정 생성 필요
+3. mongodb 구성
+   - Docker container 환경변수
+   - MONGO_INITDB_ROOT_USERNAME=eval
+   - MONGO_INITDB_ROOT_PASSWORD=random
+   - MONGO_INITDB_ROOT_DATABASE=students
+   - port 27017
+4. '--spring.profiles.active=dev' 옵션으로 실행
