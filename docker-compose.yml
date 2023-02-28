@@ -1,4 +1,4 @@
-version: "3.0"
+version: "3.9"
 services:
   rabbitmq:
     hostname: 'rabbit'
@@ -13,13 +13,34 @@ services:
       - './rabbit-data/:/var/lib/rabbitmq/mnesia'
     networks:
       - evaluation
-  evaluation:
-    image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation:latest'
-#    image: "evaluation:test"
-    container_name: evaluation
+  evaluation-api:
+    image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-api:latest'
+#    image: "evaluation-api:test"
+    container_name: evaluation-api
     restart: on-failure
+    depends_on:
+      - mongo
     ports:
-      - "8080-8085:8080"
+      - "8080:8080"
+    env_file: './.env'
+    command:
+      - '-Duser.timezone=Asia/Seoul'
+      - '--spring.profiles.active=prod'
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '/usr/share/zoneinfo/Asia/Seoul:/etc/timezone:ro'
+    networks:
+      - evaluation
+  evaluation-event:
+    image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest'
+    #    image: "evaluation-event:test"
+    deploy:
+      replicas: 3
+    depends_on:
+      - rabbitmq
+      - mongo
+    container_name: evaluation-event
+    restart: on-failure
     env_file: './.env'
     command:
       - '-Duser.timezone=Asia/Seoul'
