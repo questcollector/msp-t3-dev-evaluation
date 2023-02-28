@@ -1,0 +1,48 @@
+version: "3.0"
+services:
+  rabbitmq:
+    hostname: 'rabbit'
+    image: rabbitmq:management
+    container_name: 'rabbit'
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file: ./.env
+    volumes:
+      - './rabbit-data/:/var/lib/rabbitmq/mnesia'
+    networks:
+      - evaluation
+  evaluation:
+    image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation:latest'
+#    image: "evaluation:test"
+    container_name: evaluation
+    restart: on-failure
+    ports:
+      - "8080-8085:8080"
+    env_file: ./.env
+    command:
+      - -Duser.timezone=Asia/Seoul
+      - --spring.profiles.active=prod
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '/usr/share/zoneinfo/Asia/Seoul:/etc/timezone:ro'
+    networks:
+      - evaluation
+  db:
+    image: mongo
+    container_name: 'mongo'
+    ports:
+      - "27017:27017"
+    command:
+      - --auth
+    volumes:
+      - './db/data:/data/db'
+      - './db/initdb.d/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro'
+    env_file: ./.env
+    networks:
+      - evaluation
+    restart: always
+networks:
+  evaluation:
+    driver: bridge

@@ -1,0 +1,185 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "messageData API",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8085",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "MessageData",
+      "description": "the MessageData API"
+    }
+  ],
+  "paths": {
+    "/api/messageData/": {
+      "get": {
+        "tags": [
+          "MessageData"
+        ],
+        "operationId": "getMessageDataList",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "start LocalDateTime 2023-03-06T00:00:00"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "end LocalDateTime 2023-03-06T00:00:00"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDataDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/messageData/slackUserName/{slackUserName}": {
+      "get": {
+        "tags": [
+          "MessageData"
+        ],
+        "operationId": "getMessageDataListBySlackUserName",
+        "parameters": [
+          {
+            "name": "slackUserName",
+            "in": "path",
+            "description": "slack member Name 홍길동(hong.gildong)",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDataDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/messageData/uuid/{uuid}": {
+      "get": {
+        "tags": [
+          "MessageData"
+        ],
+        "operationId": "getMessageDataByMessageUuid",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "message id: UUID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDataDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MessageDataDTO": {
+        "required": [
+          "isPass"
+        ],
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "description": "message id: UUID",
+            "example": "6bcd5858-6786-4d93-9d3e-d93785e9e05c"
+          },
+          "sentDateTime": {
+            "type": "string",
+            "description": "datetime that a message sent",
+            "format": "date-time",
+            "example": "2022-05-18T05:01:43+09:00"
+          },
+          "hostname": {
+            "type": "string",
+            "description": "hostname that a message came from",
+            "example": "EC2XXXX-XXXXXXX"
+          },
+          "ipAddress": {
+            "type": "string",
+            "description": "ipAddress that a message came from",
+            "example": "172.31.XXX.XXX"
+          },
+          "slackUserId": {
+            "type": "string",
+            "description": "slack member id",
+            "example": "UXXXXXXXXXX"
+          },
+          "slackUserName": {
+            "type": "string",
+            "description": "slack member name",
+            "example": "홍길동(hong.gildong)"
+          },
+          "payload": {
+            "type": "string",
+            "description": "message payload(CampaignDTO)",
+            "example": "{\"campaignId\":23,...}"
+          },
+          "isPass": {
+            "type": "boolean",
+            "description": "a message is good enough or not",
+            "example": true
+          }
+        }
+      },
+      "ServerResponse": {
+        "type": "object"
+      }
+    }
+  }
+}

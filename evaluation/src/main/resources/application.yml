@@ -1,0 +1,102 @@
+spring:
+  profiles:
+    group:
+      dev: "test,dev,common"
+      prod: "prod,common"
+      test: "test,common"
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "common"
+  rabbitmq:
+    addresses: ${RABBITMQ_HOST:localhost}:${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD:admin}
+  cloud:
+    function:
+      definition: campaignAddedEvent
+    stream:
+      bindings:
+        campaignAddedEvent-in-0:
+          destination: campaignAddedEvent
+          group: evaluation
+          error-handler-definition: errorHandler
+          consumer:
+            maxAttempts: 1
+        notificationSuccessEvent-out-0:
+          destination: notificationSuccessEvent
+          error-handler-definition: errorHandler
+        notificationFailedEvent-out-0:
+          destination: notificationFailedEvent
+          error-handler-definition: errorHandler
+      rabbit:
+        bindings:
+          notificationSuccessEvent-out-0:
+            producer:
+              routingKeyExpression: "headers['routingkey']"
+          notificationFailedEvent-out-0:
+            producer:
+              routingKeyExpression: "headers['routingkey']"
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL:https://dummy-webhook}
+  bot:
+    token: ${SLACK_BOT_TOKEN:dummy-token}
+springdoc:
+  version: 'v1'
+  swagger-ui:
+    use-root-path: true
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  data:
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:students}
+      username: ${MONGO_USER}
+      password: ${MONGO_PASSWORD}
+      uuidRepresentation: standard
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  data:
+    mongodb:
+      username: ${MONGO_USER}
+      password: ${MONGO_PASSWORD}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "test"
+  jackson:
+    deserialization:
+      ADJUST_DATES_TO_CONTEXT_TIME_ZONE: false
+  data:
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:students}
+      uuidRepresentation: standard
+de.flapdoodle.mongodb:
+  embedded:
+    version: 6.0.4
+server:
+  port: 8085
+logging:
+  level:
+    com.samsung.sds.t3.dev.evaluation: TRACE
+    org.springframework: DEBUG
