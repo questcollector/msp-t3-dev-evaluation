@@ -29,6 +29,9 @@ dependencies {
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("io.mockk:mockk:1.13.4")
 
+    // caching
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+
     // Spring Cloud Stream
     implementation("org.springframework.cloud:spring-cloud-stream-binder-rabbit:4.0.1")
     implementation("org.springframework.cloud:spring-cloud-function-kotlin:4.0.1")

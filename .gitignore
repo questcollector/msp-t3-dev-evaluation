@@ -1,2 +1,5 @@
 .DS_Store
 .idea/
+db/
+rabbit-data/
+.env
