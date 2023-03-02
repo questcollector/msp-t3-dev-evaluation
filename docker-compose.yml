@@ -15,11 +15,10 @@ services:
       - evaluation
   evaluation-api:
     image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-api:latest'
-#    image: "evaluation-api:test"
     container_name: evaluation-api
     restart: on-failure
     depends_on:
-      - mongo
+      - db
     ports:
       - "8080:8080"
     env_file: './.env'
@@ -33,13 +32,11 @@ services:
       - evaluation
   evaluation-event:
     image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest'
-    #    image: "evaluation-event:test"
     deploy:
       replicas: 3
     depends_on:
       - rabbitmq
-      - mongo
-    container_name: evaluation-event
+      - db
     restart: on-failure
     env_file: './.env'
     command:
