@@ -1,9 +1,9 @@
 spring:
   profiles:
     group:
-      dev: "test,dev,common"
+      dev: "dev,common"
       prod: "prod,common"
-      test: "test,common"
+      test: "test,dev,common"
 
 ---
 
@@ -41,8 +41,6 @@ spring:
             producer:
               routingKeyExpression: "headers['routingkey']"
 slack:
-  webhook:
-    url: ${SLACK_WEBHOOK_URL:https://dummy-webhook}
   user:
     token: ${SLACK_USER_TOKEN:dummy-token}
 
@@ -69,8 +67,16 @@ spring:
       on-profile: "dev"
   data:
     mongodb:
-      username: ${MONGO_USER:eval}
-      password: ${MONGO_PASSWORD:random}
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:students}
+      uuidRepresentation: standard
+server:
+  port: 8090
+logging:
+  level:
+    com.samsung.sds.t3.dev.evaluation: TRACE
+    org.springframework: DEBUG
 
 ---
 
@@ -81,18 +87,6 @@ spring:
   jackson:
     deserialization:
       ADJUST_DATES_TO_CONTEXT_TIME_ZONE: false
-  data:
-    mongodb:
-      host: ${MONGO_HOST:localhost}
-      port: ${MONGO_PORT:27017}
-      database: ${MONGO_DATABASE:students}
-      uuidRepresentation: standard
 de.flapdoodle.mongodb:
   embedded:
     version: 6.0.4
-server:
-  port: 8090
-logging:
-  level:
-    com.samsung.sds.t3.dev.evaluation: TRACE
-    org.springframework: DEBUG
