@@ -1,0 +1,64 @@
+spring:
+  profiles:
+    group:
+      dev: "dev,common"
+      prod: "prod,common"
+      test: "test,dev,common"
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "common"
+springdoc:
+  version: 'v1'
+  swagger-ui:
+    use-root-path: true
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  data:
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:students}
+      username: ${MONGO_USER}
+      password: ${MONGO_PASSWORD}
+      uuidRepresentation: standard
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  data:
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:students}
+      uuidRepresentation: standard
+server:
+  port: 8085
+logging:
+  level:
+    com.samsung.sds.t3.dev.evaluation: TRACE
+    org.springframework: DEBUG
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "test"
+  jackson:
+    deserialization:
+      ADJUST_DATES_TO_CONTEXT_TIME_ZONE: false
+de.flapdoodle.mongodb:
+  embedded:
+    version: 6.0.4

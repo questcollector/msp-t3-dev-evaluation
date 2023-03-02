@@ -32,10 +32,8 @@ EOF
 fi
 
 if [ ! -f "./.env" ]; then
-echo "Enter SLACK_BOT_TOKEN: "
-read -rs slack_bot_token
-echo "Enter SLACK_WEBHOOK_URL: "
-read -rs slack_webhook_url
+echo "Enter SLACK_USER_TOKEN: "
+read -rs slack_user_token
 
 cat <<EOF > ./.env
 MONGO_HOST=mongo
@@ -46,8 +44,7 @@ MONGO_INITDB_DATABASE=students
 MONGO_USER=eval
 MONGO_PASSWORD=$rand_passwd
 RABBITMQ_HOST=rabbit
-SLACK_BOT_TOKEN=$slack_bot_token
-SLACK_WEBHOOK_URL=$slack_webhook_url
+SLACK_USER_TOKEN=$slack_user_token
 TZ=Asia/Seoul
 EOF
 fi

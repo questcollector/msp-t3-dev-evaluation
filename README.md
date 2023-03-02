@@ -14,3 +14,15 @@ docker-compose 정의 파일
 
 ## rabbitmq 라우팅 키 설정
 rabbitmq 설정 공유파일 제공
+
+## 로컬에서 실행
+
+1. 기본 실행
+   - 디렉토리 구성
+      - `./db/data/`
+      - `./rabbit-data/`
+2. evaluation-api 실행
+   - Program argument: --spring.profiles.active=dev
+3. evaluation-event 실행
+   - Program argument: --spring.profiles.active=dev
+   - env var: SLACK_USER_TOKEN
