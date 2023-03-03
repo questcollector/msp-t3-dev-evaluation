@@ -24,7 +24,15 @@ class SlackMessagingServiceTests {
         val authTest = slack.methods(token).authTest(
             AuthTestRequest.builder().build()
         )
-        assumeTrue(authTest.isOk)
+        val scopes = authTest.httpResponseHeaders["x-oauth-scopes"]?.get(0)?.split(",")
+        assertThat(scopes).contains(
+            "channels:read",
+            "groups:read",
+            "im:read",
+            "mpim:read",
+            "users:read",
+            "chat:write"
+        )
     }
 
     @Test

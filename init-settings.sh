@@ -9,7 +9,7 @@ db_dir="./db"
 if [ ! -d "$db_dir" ]; then mkdir -p ./db/{data,initdb.d}
 fi
 
-rand_passwd=$(</dev/urandom tr -dc 'A-Za-z0-9@#$%&_+=' | head -c 16)
+rand_passwd=$(base64 /dev/urandom | head -c32)
 
 init_mongo="./db/initdb.d/init-mongo.js"
 if [ ! -f "$init_mongo" ]; then

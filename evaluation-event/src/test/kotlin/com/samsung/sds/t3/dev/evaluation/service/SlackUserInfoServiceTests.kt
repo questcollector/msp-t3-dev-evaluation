@@ -4,7 +4,7 @@ import com.slack.api.Slack
 import com.slack.api.methods.request.auth.AuthTestRequest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assumptions
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -14,12 +14,20 @@ class SlackUserInfoServiceTests {
     private val userId = System.getenv("SLACK_USER_ID")
     @BeforeEach
     fun `슬랙 테스트 사전점검`() {
-        Assumptions.assumeTrue(token != null)
-        Assumptions.assumeTrue(userId != null)
+        assumeTrue(token != null)
+        assumeTrue(userId != null)
         val authTest = slack.methods(token).authTest(
             AuthTestRequest.builder().build()
         )
-        Assumptions.assumeTrue(authTest.isOk)
+        val scopes = authTest.httpResponseHeaders["x-oauth-scopes"]?.get(0)?.split(",")
+        assertThat(scopes).contains(
+            "channels:read",
+            "groups:read",
+            "im:read",
+            "mpim:read",
+            "users:read",
+            "chat:write"
+        )
     }
 
     @Test
