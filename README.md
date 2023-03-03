@@ -26,7 +26,7 @@ rabbitmq 설정 공유파일 제공
 docker-compose -f docker-compose-dev.yml up -d
 ```
 3. Rabbitmq config
-   - [JSON설정 파일](rabbitmq-config/rabbit_rabbit_2023-2-28.json)을 rabbitmq management에서 (링크 http://localhost:15672 ) </br>
+   - JSON설정 파일을 rabbitmq management에서 (링크 http://localhost:15672 ) </br>
      overview > Import definitions 에 업로드하여 Upload broker definitions 버튼을 클릭합니다.
      ![](rabbitmq-config/image.png)</br>
    - 적용 후 logout 하고 admin/admin 계정으로 로그인합니다.
@@ -38,5 +38,3 @@ docker-compose -f docker-compose-dev.yml up -d
    - Program argument: ```--spring.profiles.active=dev```
    - env var: SLACK_USER_TOKEN
    - SLACK_USER_TOKEN:
-     - msp t2 실습강사: xoxp-3197093667269-3233063361091-4725689801442-60ff8f94ef7046593b3472d3b1e29f15
-     - 23-3: xoxp-4847171063303-4874409124689-4886667934932-58746f660617aab50a2d3f4e920ecccb
