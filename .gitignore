@@ -3,3 +3,4 @@
 db/
 rabbit-data/
 .env
+*.json
