@@ -8,8 +8,6 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    volumes:
-      - './rabbit-data/:/var/lib/rabbitmq/mnesia'
     networks:
       - evaluation
   db:
@@ -17,9 +15,6 @@ services:
     container_name: 'mongo'
     ports:
       - "27017:27017"
-    volumes:
-      - './db/data:/data/db'
-#      - './db/initdb.d/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro'
     environment:
       MONGO_INITDB_DATABASE: students
     networks:
