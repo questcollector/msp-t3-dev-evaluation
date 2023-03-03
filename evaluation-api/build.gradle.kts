@@ -6,7 +6,6 @@ plugins {
     kotlin("jvm") version "1.7.22"
     kotlin("plugin.spring") version "1.7.22"
     kotlin("plugin.jpa") version "1.7.22"
-    id("com.google.cloud.tools.jib") version "3.3.1"
     id("org.springdoc.openapi-gradle-plugin") version "1.6.0"
 }
 
@@ -59,20 +58,5 @@ openApi {
         "messageData.json")
     customBootRun {
         args.add("--spring.profiles.active=dev")
-    }
-}
-
-jib {
-    from {
-        image = "amazoncorretto:17"
-        platforms {
-            platform {
-                architecture = "arm64"
-                os = "linux"
-            }
-        }
-    }
-    to {
-        image = "evaluation-api:test"
     }
 }
