@@ -88,7 +88,7 @@ class SlackMessagingService (
     private fun buildMessageContent(message: MessageDataEntity): String {
         return """
             <@${message.slackUserId}>님 개발 실습참여도 과제를 성공적으로 수행하였습니다.
-            아래는 과제 제출 시 입력할 UUID 문자열입니다.
+            IntelliJ의 Run tab의 콘솔 로그에서도 아래와 같은 UUID를 확인해 주세요.
             ==========================================
             *${message.uuid}*
             ==========================================

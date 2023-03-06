@@ -26,19 +26,20 @@ class MessageDataCommandService (
 
         val headers: MessageHeaders = messageDataDTO.headers
         val payload: CampaignDTO = messageDataDTO.payload
-        val slackUserName: String? =
-            slackUserInfoService.getSlackUserNameWithSlackUserId(headers["SlackUserId"] as String)
+        val slackUserName: String? = headers["SlackUserId"]?.run {
+            slackUserInfoService.getSlackUserNameWithSlackUserId(this as String)
+        }
+
         val isPass: Boolean = calculateIsPass(headers, slackUserName)
 
-        var sentDateTime: LocalDateTime? = null
-        headers.timestamp?.run {
+        val sentDateTime: LocalDateTime? = headers.timestamp?.run {
             val epochSecond = this / 1000
             val nano = this % 1000 * 1000000
-            sentDateTime = LocalDateTime.ofEpochSecond(
-                    epochSecond,
-                    nano.toInt(),
-                    ZoneOffset.ofHours(9)
-                )
+            LocalDateTime.ofEpochSecond(
+                epochSecond,
+                nano.toInt(),
+                ZoneOffset.ofHours(9)
+            )
         }
 
         if (log.isDebugEnabled) log.debug("converted")
