@@ -2,6 +2,7 @@ package com.samsung.sds.t3.dev.evaluation.controller
 
 import com.samsung.sds.t3.dev.evaluation.config.MessageDataRouter
 import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
+import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryService
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
@@ -27,6 +28,8 @@ import java.util.*
 class MessageDataControllerTests {
     @MockBean
     private lateinit var messageDataQueryService: MessageDataQueryService
+    @MockBean
+    private lateinit var evaluationResultService: EvaluationResultService
     @Autowired
     private lateinit var wtc: WebTestClient
 
