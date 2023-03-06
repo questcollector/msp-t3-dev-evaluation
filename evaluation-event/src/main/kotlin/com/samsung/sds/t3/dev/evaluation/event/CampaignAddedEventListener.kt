@@ -42,7 +42,9 @@ class CampaignAddedEventListener (
             slackMessagingService.postMessage(saved)
             notificationEventPublisher.publishNotificationSuccessEvent(saved)
         } else {
-            notificationEventPublisher.publishNotificationFailedEvent(saved.hostname!!)
+            saved.hostname?.run {
+                notificationEventPublisher.publishNotificationFailedEvent(this)
+            }
         }
     }
 
