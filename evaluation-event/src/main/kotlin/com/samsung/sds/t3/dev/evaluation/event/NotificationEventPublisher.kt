@@ -16,7 +16,7 @@ class NotificationEventPublisher(
     suspend fun publishNotificationSuccessEvent(messageDataDTO: MessageDataEntity) {
         val payload = """
             @${messageDataDTO.slackUserName}님 개발 실습참여도 과제를 성공적으로 수행하였습니다.
-            아래는 과제 제출 시 입력할 UUID 문자열입니다.
+            slack 다이렉트 메시지에서도 아래와 같은 UUID를 확인해 주세요.
             ==========================================
             ${messageDataDTO.uuid}
             ==========================================
