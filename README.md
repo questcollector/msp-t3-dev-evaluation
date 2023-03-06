@@ -37,7 +37,7 @@ rabbitmq 설정 JSON 파일
      Overview > Import definitions 에 업로드하여 Upload broker definitions 버튼을 클릭합니다.
      ![](rabbitmq-config/image.png)</br>
    - rabbitmq 설정 JSON 파일 문의 [miroirs01@gmail.com](mailto:miroirs01@gmail.com)
-   - 적용 후 logout 하고 admin/admin 계정으로 로그인합니다.
+   - 적용 후 logout 하고 admin 계정으로 로그인합니다.
 3. evaluation-api 실행
    - 실행 시 Edit configuration을 하여 Program arguments 수정
    - Program arguments: ```--spring.profiles.active=dev```
