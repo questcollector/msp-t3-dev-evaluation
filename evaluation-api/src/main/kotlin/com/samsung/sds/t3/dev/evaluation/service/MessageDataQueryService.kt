@@ -1,10 +1,10 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
+import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -50,4 +50,6 @@ class MessageDataQueryService (
         }
 
     }
+
+
 }

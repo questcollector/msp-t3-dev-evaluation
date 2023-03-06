@@ -13,4 +13,6 @@ interface MessageDataRepository: CoroutineCrudRepository<MessageDataEntity, UUID
     fun findAllBySentDateTimeBetween(startDateTime: LocalDateTime, endDateTime: LocalDateTime): Flow<MessageDataEntity>
     fun findAllBySlackUserName(slackName: String) : Flow<MessageDataEntity>
     suspend fun findByUuid(uuid: UUID) : MessageDataEntity?
+
+    fun findAllBySlackUserNameStartsWith(slackName: String) : Flow<MessageDataEntity>
 }
