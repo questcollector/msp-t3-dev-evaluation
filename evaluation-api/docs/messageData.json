@@ -12,11 +12,43 @@
   ],
   "tags": [
     {
+      "name": "Evaluation",
+      "description": "the Evaluation API"
+    },
+    {
       "name": "MessageData",
       "description": "the MessageData API"
     }
   ],
   "paths": {
+    "/api/evaluation/slackUserName/": {
+      "get": {
+        "tags": [
+          "Evaluation"
+        ],
+        "operationId": "getEvaluationResultBySlackUserName",
+        "parameters": [
+          {
+            "name": "slackUserName",
+            "in": "query",
+            "description": "slack member Name like 홍길동",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/messageData/": {
       "get": {
         "tags": [
@@ -128,6 +160,32 @@
   },
   "components": {
     "schemas": {
+      "EvaluationResultDTO": {
+        "required": [
+          "data",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "boolean",
+            "description": "true or false",
+            "example": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "there\u0027s no messages from user",
+            "example": "reason for evaluation result"
+          },
+          "data": {
+            "type": "array",
+            "description": "messages from user",
+            "items": {
+              "$ref": "#/components/schemas/MessageDataDTO"
+            }
+          }
+        }
+      },
       "MessageDataDTO": {
         "required": [
           "isPass"

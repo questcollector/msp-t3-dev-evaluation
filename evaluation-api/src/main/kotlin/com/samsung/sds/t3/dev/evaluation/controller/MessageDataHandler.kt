@@ -1,11 +1,8 @@
 package com.samsung.sds.t3.dev.evaluation.controller
 
-import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryService
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -16,8 +13,7 @@ import java.time.format.DateTimeParseException
 @Component
 @Tag(name = "MessageData", description = "the MessageData API")
 class MessageDataHandler(
-    private val messageDataQueryService: MessageDataQueryService,
-    private val evaluationResultService: EvaluationResultService
+    private val messageDataQueryService: MessageDataQueryService
 ) {
 
     private val log : Logger = LoggerFactory.getLogger(this.javaClass)
@@ -61,13 +57,6 @@ class MessageDataHandler(
         return ServerResponse.ok().json().bodyAndAwait(result)
     }
 
-    suspend fun getEvaluationResultBySlackUserName(request: ServerRequest) : ServerResponse {
-        val slackUserName = request.queryParamOrNull("slackUserName")
-        log.debug("slackUserName: $slackUserName")
-        slackUserName ?: return ServerResponse.notFound().buildAndAwait()
 
-        val result = evaluationResultService.getEvaluationResultBySlackUserName(slackUserName)
-        return ServerResponse.ok().json().bodyValueAndAwait(result)
-    }
 }
 

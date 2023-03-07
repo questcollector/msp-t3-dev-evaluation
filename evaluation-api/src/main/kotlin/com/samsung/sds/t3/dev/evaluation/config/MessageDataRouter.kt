@@ -2,19 +2,15 @@ package com.samsung.sds.t3.dev.evaluation.config
 
 import com.samsung.sds.t3.dev.evaluation.controller.MessageDataHandler
 import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
-import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.models.info.Info
 import kotlinx.coroutines.FlowPreview
 import org.springdoc.core.annotations.RouterOperation
 import org.springdoc.core.annotations.RouterOperations
-import org.springdoc.core.models.GroupedOpenApi
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -23,16 +19,6 @@ import org.springframework.web.reactive.function.server.coRouter
 
 @Configuration
 class MessageDataRouter {
-
-    @Bean
-    fun messageDataOpenApi(@Value("\${springdoc.version:v1}") appVersion: String? = "v1"): GroupedOpenApi? {
-        val messageDataPaths = "/api/messageData/**"
-        val evaluationDataPaths = "/api/evaluation/**"
-        return GroupedOpenApi.builder().group("messageData")
-            .addOpenApiCustomizer { openApi -> openApi.info(Info().title("messageData API").version(appVersion)) }
-            .pathsToMatch(messageDataPaths, evaluationDataPaths)
-            .build()
-    }
 
     @FlowPreview
     @Bean
@@ -119,31 +105,6 @@ class MessageDataRouter {
                     content = [Content(mediaType = "application/json", schema = Schema(implementation = MessageDataDTO::class))]
                 )]
             )
-        ),
-        RouterOperation(
-            method = arrayOf(RequestMethod.GET),
-            beanClass = MessageDataHandler::class,
-            beanMethod = "getEvaluationResultBySlackUserName",
-            path = "/api/evaluation/slackUserName/",
-            operation = Operation(
-                operationId = "getEvaluationResultBySlackUserName",
-                tags = ["MessageData"],
-                parameters = [
-                    Parameter(
-                        `in` = ParameterIn.QUERY,
-                        name = "slackUserName",
-                        description = "slack member Name like 홍길동",
-                        required = true
-                    )
-                ],
-                responses = [
-                    ApiResponse(
-                        responseCode = "200",
-                        description = "Success",
-                        content = [Content(mediaType = "application/json", schema = Schema(implementation = EvaluationResultDTO::class))]
-                    )
-                ]
-            )
         )
     ))
     fun messageDataRoutes(messageDataHandler: MessageDataHandler) = coRouter {
@@ -151,7 +112,6 @@ class MessageDataRouter {
             GET("/api/messageData/", messageDataHandler::getMessageDataList)
             GET("/api/messageData/slackUserName/{slackUserName}", messageDataHandler::getMessageDataListBySlackUserName)
             GET("/api/messageData/uuid/{uuid}", messageDataHandler::getMessageDataByMessageUuid)
-            GET("/api/evaluation/slackUserName/", messageDataHandler::getEvaluationResultBySlackUserName)
         }
     }
 }
