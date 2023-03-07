@@ -11,10 +11,6 @@ services:
     env_file: "./.env"
     volumes:
       - "./rabbit-data/:/var/lib/rabbitmq/mnesia"
-    secrets:
-      - source: "erlang_cookie"
-        target: "/var/lib/rabbitmq/.erlang.cookie"
-        mode: 0600
     networks:
       - "evaluation"
   rabbitmq-node1:
@@ -24,10 +20,7 @@ services:
     depends_on:
       - "rabbitmq"
     restart: "always"
-    secrets:
-      - source: "erlang_cookie"
-        target: "/var/lib/rabbitmq/.erlang.cookie"
-        mode: 0600
+    env_file: "./.env"
     networks:
       - "evaluation"
     links:
@@ -39,10 +32,7 @@ services:
     depends_on:
       - "rabbitmq"
     restart: "always"
-    secrets:
-      - source: "erlang_cookie"
-        target: "/var/lib/rabbitmq/.erlang.cookie"
-        mode: 0600
+    env_file: "./.env"
     networks:
       - "evaluation"
     links:
@@ -98,6 +88,3 @@ services:
 networks:
   evaluation:
     driver: "bridge"
-secrets:
-  erlang_cookie:
-    file: "./.erlang.cookie"
