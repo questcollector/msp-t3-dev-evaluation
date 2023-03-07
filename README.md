@@ -21,6 +21,20 @@ rabbitmq 설정 JSON 파일
 
 문의 [miroirs01@gmail.com](mailto:miroirs01@gmail.com)
 
+## rabbitmq cluster 구성
+
+docker-compose로 실행 후 rabbit-node1, rabbit-node2 컨테이너에 다름 명령어를 실행하여 클러스터링합니다.
+```bash
+docker exec -it rabbit-node1 bash
+```
+```bash
+rabbitmqctl stop_app
+rabbitmqctl join_cluster rabbit@rabbit
+rabbimqctl start_app
+exit
+```
+
+
 ## 로컬에서 실행
 
 1. RabbitMQ와 MongoDB는 Docker compose로 구동할 수 있음

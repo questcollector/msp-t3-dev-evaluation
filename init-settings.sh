@@ -9,6 +9,15 @@ db_dir="./db"
 if [ ! -d "$db_dir" ]; then mkdir -p ./db/{data,initdb.d}
 fi
 
+erlang_cookie="./.erlang.cookie"
+if [ ! -d "$db_dir" ]; then
+erlang_cookie_random=$(base64 /dev/urandom | head -c32)
+cat <<EOF > "$erlang_cookie"
+$erlang_cookie_random
+EOF
+chmod 0600 $erlang_cookie
+fi
+
 rand_passwd=$(base64 /dev/urandom | head -c32)
 
 init_mongo="./db/initdb.d/init-mongo.js"
