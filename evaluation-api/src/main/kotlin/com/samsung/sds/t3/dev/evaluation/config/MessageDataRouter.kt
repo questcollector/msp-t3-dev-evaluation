@@ -63,13 +63,13 @@ class MessageDataRouter {
                     Parameter(
                         `in` = ParameterIn.QUERY,
                         name = "startDate",
-                        description = "start LocalDateTime 2023-03-06T00:00:00",
+                        description = "start LocalDateTime 2023-03-06T00:00:00, excluded",
                         required = false
                     ),
                     Parameter(
                         `in` = ParameterIn.QUERY,
                         name = "endDate",
-                        description = "end LocalDateTime 2023-03-06T00:00:00",
+                        description = "end LocalDateTime 2023-03-06T00:00:00, excluded",
                         required = false
                     )
                              ],

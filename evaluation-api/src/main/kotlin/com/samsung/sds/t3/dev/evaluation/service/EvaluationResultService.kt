@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class EvaluationResultService (
@@ -14,7 +15,10 @@ class EvaluationResultService (
 ) {
     private val log : Logger = LoggerFactory.getLogger(this.javaClass)
 
-    suspend fun getEvaluationResultBySlackUserName(slackUserName: String): EvaluationResultDTO {
+    suspend fun getEvaluationResultBySlackUserName(
+        slackUserName: String,
+        startDateTime: LocalDateTime,
+        endDateTime: LocalDateTime): EvaluationResultDTO {
         val messages = messageDataRepository.findAllBySlackUserNameStartsWith(slackUserName)
 
         var result = true
@@ -24,20 +28,24 @@ class EvaluationResultService (
             result = false
             reason = "메시지 없음"
         } else {
-            val hostname = messages.filter {
-                it.isPass // 통과한 메시지만 필터링
-            }.map {
+            val passedMessages = messages.filter {
+                (it.isPass // 통과한 메시지만 필터링
+                        && (it.sentDateTime!!.isAfter(startDateTime) || it.sentDateTime.isEqual(startDateTime))
+                        && it.sentDateTime.isBefore(endDateTime))
+            }
+            val hostname = passedMessages.map {
                 it.hostname
             }.toSet()
 
-            val ipAddress = messages.filter {
-                it.isPass // 통과한 메시지만 필터링
-            }.map {
+            val ipAddress = passedMessages.map {
                 it.ipAddress
             }.toSet()
 
-            log.debug("hostname: $hostname")
-            log.debug("ipAddress: $ipAddress")
+            if (log.isDebugEnabled) {
+                log.debug("passed Message Count: ${passedMessages.count()}")
+                log.debug("hostname: $hostname")
+                log.debug("ipAddress: $ipAddress")
+            }
 
             if (hostname.isEmpty() || ipAddress.isEmpty()) {
                 result = false

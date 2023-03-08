@@ -34,6 +34,18 @@ class EvaluationResultRouter {
                         name = "slackUserName",
                         description = "slack member Name like 홍길동",
                         required = true
+                    ),
+                    Parameter(
+                        `in` = ParameterIn.QUERY,
+                        name = "startDate",
+                        description = "start LocalDateTime 2023-03-06T00:00:00, included",
+                        required = false
+                    ),
+                    Parameter(
+                        `in` = ParameterIn.QUERY,
+                        name = "endDate",
+                        description = "end LocalDateTime 2023-03-06T00:00:00, excluded",
+                        required = false
                     )
                 ],
                 responses = [
