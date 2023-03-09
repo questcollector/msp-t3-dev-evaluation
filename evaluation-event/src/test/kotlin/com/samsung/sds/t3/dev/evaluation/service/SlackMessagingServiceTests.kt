@@ -41,10 +41,10 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         runBlocking {
-            val channels = slackMessagingService.getDirectChannels()
-            val directChannel = channels.channels.first { it.user == userId }
-            println(channels)
-            assertThat(directChannel.id).isNotEmpty
+            val directChannel = slackMessagingService.getDirectChannel(userId)
+
+            println(directChannel)
+            assertThat(directChannel.channel.user).isEqualTo(userId)
         }
     }
 
@@ -54,10 +54,10 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         runBlocking {
-            assertThrows<NoSuchElementException> {
-                slackMessagingService.getDirectChannels().channels
-                    .first { it.user == "<<SLACK_USER_ID>>" }
-            }
+            
+            val directChannel = slackMessagingService.getDirectChannel("<<SLACK_USER_ID>>")
+            assertThat(directChannel.isOk).isFalse
+            
         }
     }
 

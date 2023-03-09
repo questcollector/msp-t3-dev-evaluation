@@ -40,10 +40,12 @@ class CampaignAddedEventListener (
 
         if (saved.isPass) {
             slackMessagingService.postMessage(saved)
-            notificationEventPublisher.publishNotificationSuccessEvent(saved)
+            // 임시로 주석처리
+//            notificationEventPublisher.publishNotificationSuccessEvent(saved)
         } else {
             saved.hostname?.run {
-                notificationEventPublisher.publishNotificationFailedEvent(this)
+                // 임시로 주석처리
+//                notificationEventPublisher.publishNotificationFailedEvent(this)
             }
         }
     }
