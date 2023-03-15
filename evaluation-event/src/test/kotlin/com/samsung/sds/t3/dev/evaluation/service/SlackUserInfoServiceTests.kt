@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 
 class SlackUserInfoServiceTests {
     private val slack = Slack.getInstance()
-    private val token = System.getenv("SLACK_USER_TOKEN")
+    private val token = System.getenv("SLACK_BOT_TOKEN")
     private val userId = System.getenv("SLACK_USER_ID")
     @BeforeEach
     fun `슬랙 테스트 사전점검`() {
@@ -24,6 +24,8 @@ class SlackUserInfoServiceTests {
             "channels:read",
             "groups:read",
             "im:read",
+            "im:write",
+            "incoming-webhook",
             "mpim:read",
             "users:read",
             "chat:write"

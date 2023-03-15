@@ -20,7 +20,7 @@ class SlackUserInfoService (
     @Value("\${slack.user.token:dummy-token}")
     lateinit var slackToken: String
 
-    @Cacheable(cacheNames = arrayOf("slackUserName"), key = "#slackUserId")
+    @Cacheable(cacheNames = ["slackUserName"], key = "#slackUserId")
     suspend fun getSlackUserNameWithSlackUserId(slackUserId: String): String? {
         val response = slack.methodsAsync(slackToken).usersInfo(
             UsersInfoRequest.builder()
