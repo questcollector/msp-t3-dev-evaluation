@@ -18,7 +18,7 @@ class MessageDataQueryService (
 
     suspend fun getMessageDataDuring(startDateTime: LocalDateTime? = null,
                                       endDateTime: LocalDateTime? = null): Flow<MessageDataDTO> {
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now().withNano(0)
         val start = startDateTime ?: now.minusDays(1)
         val end = endDateTime ?: now
 
@@ -28,7 +28,7 @@ class MessageDataQueryService (
 
         return messageDataEntities
             .filterNotNull()
-            .filter { it.sentDateTime.isAfter(startDateTime) && it.sentDateTime.isBefore(endDateTime) }
+            .filter { it.sentDateTime.isAfter(start) && it.sentDateTime.isBefore(end) }
             .map { entity -> entity.toMessageDataDTO() }
     }
 

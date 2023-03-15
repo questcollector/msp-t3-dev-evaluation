@@ -14,7 +14,7 @@ import java.util.*
 data class MessageDataEntity (
     @Id
     val id: ObjectId? = null,
-    val sentDateTime: LocalDateTime = LocalDateTime.now(),
+    val sentDateTime: LocalDateTime = LocalDateTime.now().withNano(0),
     val instanceId: String? = null,
     val ipAddress: String? = null,
     val slackUserId: String? = null,

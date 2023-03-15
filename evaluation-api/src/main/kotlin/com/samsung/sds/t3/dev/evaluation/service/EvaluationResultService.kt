@@ -28,27 +28,28 @@ class EvaluationResultService (
             result = false
             reason = "메시지 없음"
         } else {
-            val passedMessages = messages.filter {
+            val filteredMessages = messages.filter {
                 (it.sentDateTime.isAfter(startDateTime) || it.sentDateTime.isEqual(startDateTime))
                         && it.sentDateTime.isBefore(endDateTime)
             }
-            val instanceId = passedMessages.map {
-                it.instanceId
-            }.filterNotNull()
-                .toSet()
 
-            val ipAddress = passedMessages.map {
+            val passedMessages = filteredMessages.filterNotNull().filter { it.isPass }
+
+            val instanceId = filteredMessages.mapNotNull {
+                it.instanceId
+            }.filterNotNull().toSet()
+
+            val ipAddress = filteredMessages.mapNotNull {
                 it.ipAddress
-            }.filterNotNull()
-                .toSet()
+            }.filterNotNull().toSet()
 
             if (log.isDebugEnabled) {
-                log.debug("passed Message Count: ${passedMessages.count()}")
+                log.debug("passed Message Count: ${filteredMessages.count()}")
                 log.debug("instanceId: $instanceId")
                 log.debug("ipAddress: $ipAddress")
             }
 
-            if (instanceId.isEmpty() || ipAddress.isEmpty()) {
+            if (passedMessages.count() == 0) {
                 result = false
                 reason = "통과한 메시지 없음"
             } else if (instanceId.count() > 1 || ipAddress.count() > 1) {
