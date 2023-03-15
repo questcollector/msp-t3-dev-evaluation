@@ -33,6 +33,7 @@ class MessageDataRepositoryTests (
     private val messageDataRepository: MessageDataRepository
 ) {
 
+    private val NOW = LocalDateTime.now().withNano(0)
     private val TODAY = LocalDateTime.parse("2023-02-22T23:57:06.578")
     private val YESTERDAY = TODAY.minusDays(1)
     private val SAMPLE_UUID = UUID.randomUUID()
@@ -44,9 +45,9 @@ class MessageDataRepositoryTests (
         runBlocking {
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = TODAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
-            entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
-            entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
-            entities.add(messageDataRepository.save(MessageDataEntity(uuid = SAMPLE_UUID)))
+            entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
+            entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
+            entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, uuid = SAMPLE_UUID)))
         }
     }
 
@@ -57,24 +58,10 @@ class MessageDataRepositoryTests (
         }
     }
 
-
-    @Test
-    fun `특정 기간 사이의 모든 메시지 조회하기`() {
-        runBlocking {
-            val result = messageDataRepository.findAllBySentDateTimeBetween(
-                YESTERDAY.minusHours(1),
-                TODAY.plusHours(1)
-            ).toList()
-            assertThat(result.toList()).containsAll(
-                entities.subList(0, 2)
-            )
-        }
-    }
-
     @Test
     fun `유저 이름으로 보낸 메시지 조회하기`() {
         runBlocking {
-            val result = messageDataRepository.findAllBySlackUserName(TEST)
+            val result = messageDataRepository.findAllBySlackUserNameStartsWith(TEST)
             assertThat(result.toList()).containsAll(
                 entities.subList(2, 4)
             )

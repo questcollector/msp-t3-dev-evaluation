@@ -46,7 +46,7 @@ class MessageDataCommandService (
 
         return MessageDataEntity(
             null,
-            sentDateTime,
+            sentDateTime?: LocalDateTime.now(),
             headers["InstanceId"] as? String,
             headers["IpAddress"] as? String,
             headers["SlackUserId"] as? String,
