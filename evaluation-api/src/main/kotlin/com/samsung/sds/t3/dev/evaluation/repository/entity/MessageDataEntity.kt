@@ -15,7 +15,7 @@ data class MessageDataEntity (
     @Id
     val id: ObjectId? = null,
     val sentDateTime: LocalDateTime? = null,
-    val hostname: String? = null,
+    val instanceId: String? = null,
     val ipAddress: String? = null,
     val slackUserId: String? = null,
     val slackUserName: String? = null,
@@ -29,7 +29,7 @@ data class MessageDataEntity (
 fun MessageDataEntity.toMessageDataDTO() = MessageDataDTO(
     uuid.toString(),
     sentDateTime?.run { OffsetDateTime.of(sentDateTime, ZoneOffset.ofHours(9)) },
-    hostname,
+    instanceId,
     ipAddress,
     slackUserId,
     slackUserName,

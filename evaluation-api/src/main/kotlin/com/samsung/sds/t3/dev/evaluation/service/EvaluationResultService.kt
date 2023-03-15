@@ -34,7 +34,7 @@ class EvaluationResultService (
                         && it.sentDateTime.isBefore(endDateTime))
             }
             val hostname = passedMessages.map {
-                it.hostname
+                it.instanceId
             }.toSet()
 
             val ipAddress = passedMessages.map {

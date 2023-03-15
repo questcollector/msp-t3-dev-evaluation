@@ -31,6 +31,7 @@ class SlackMessagingService (
 
         val directChannel = getDirectChannel(message.slackUserId!!)
         if (log.isDebugEnabled) log.debug("directChannel: $directChannel")
+        if (!directChannel.isOk) throw NoSuchElementException(message.slackUserId)
 
         val response = slack.methodsAsync(slackToken).chatPostMessage(
             ChatPostMessageRequest.builder()
@@ -68,7 +69,7 @@ class SlackMessagingService (
                 } else {
                     log.info("Error on getDirectChannels: ${t.error}")
                     if (log.isDebugEnabled) log.debug("$t")
-                    it.resumeWithException(u)
+                    it.resume(t)
                 }
             }
         }
@@ -86,19 +87,12 @@ class SlackMessagingService (
      * @return Formatted String as Slack postMessage api palyload
      */
     private fun buildMessageContent(message: MessageDataEntity): String {
-//        return """
-//            <@${message.slackUserId}>님 개발 실습참여도 과제를 성공적으로 수행하였습니다.
-//            IntelliJ의 Run tab의 콘솔 로그에서도 아래와 같은 UUID를 확인해 주세요.
-//            ==========================================
-//            *${message.uuid}*
-//            ==========================================
-//
-//        """.trimIndent()
         return """
-            <@${message.slackUserId}>님 개발 실습참여도 과제를 성공적으로 수행하였습니다.
-            아래는 생성된 데이터의 UUID입니다.
+            Excellent <@${message.slackUserId}>, 
+            You have successfully completed the development practice assignment.
+            You can check the same UUID below in the console logs on IntelliJ.
             ==========================================
-            *${message.uuid}*
+            ${message.uuid}
             ==========================================
             
         """.trimIndent()

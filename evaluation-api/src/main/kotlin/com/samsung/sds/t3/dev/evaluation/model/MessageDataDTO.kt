@@ -42,13 +42,13 @@ data class MessageDataDTO (
      * @return hostname
      */
     @Schema(
-        name = "hostname",
-        example = "EC2XXXX-XXXXXXX",
-        description = "hostname that a message came from",
+        name = "instanceId",
+        example = "i-xxxxxxxxxxxxxxxxx",
+        description = "instanceId that a message came from",
         required = false
     )
-    @JsonProperty("hostname")
-    val hostname: String? = null,
+    @JsonProperty("instanceId")
+    val instanceId: String? = null,
 
     /**
      * ipAddress that a message came from

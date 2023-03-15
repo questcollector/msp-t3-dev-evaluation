@@ -15,33 +15,35 @@ class NotificationEventPublisher(
 
     suspend fun publishNotificationSuccessEvent(messageDataDTO: MessageDataEntity) {
         val payload = """
-            @${messageDataDTO.slackUserName}님 개발 실습참여도 과제를 성공적으로 수행하였습니다.
-            slack 다이렉트 메시지에서도 아래와 같은 UUID를 확인해 주세요.
+            Excellent @${messageDataDTO.slackUserName}, 
+            You have successfully completed the development practice assignment
+            You can check the same UUID below in the DM on Slack
             ==========================================
             ${messageDataDTO.uuid}
             ==========================================
             
         """.trimIndent()
         val message = MessageBuilder.withPayload(payload)
-            .setHeader("routingkey", messageDataDTO.hostname).build()
+            .setHeader("routingkey", messageDataDTO.slackUserId).build()
         streamBridge.send("notificationSuccessEvent-out-0",
             message)
-        log.info("Success event: message was sent to ${messageDataDTO.hostname}")
+        log.info("Success event: message was sent to ${messageDataDTO.slackUserId}")
         if (log.isDebugEnabled) log.debug("message payload: \n$payload")
     }
 
-    suspend fun publishNotificationFailedEvent(hostname: String) {
+    suspend fun publishNotificationFailedEvent(messageDataDTO: MessageDataEntity) {
         val payload = """
-            조건이 충족되지 않았습니다. 다음 내용을 확인하세요
-            1. application.properties의 slack.user.id 속성에 슬랙 멤버 아이디를 입력하기
-            2. CampaignEventChannelInterceptor의 preSend() 메소드 구현하기
+            This is reply to the message from EC2 instance which id is ${messageDataDTO.instanceId}.
+            The requirement was not fulfilled. Please check the following information.
+            1. Please check "slack.user.id" property in application.properties file.
+            2. Please check implementation of "CampaignEventChannelInterceptor.preSend()" method.
             
         """.trimIndent()
         val message = MessageBuilder.withPayload(payload)
-            .setHeader("routingkey", hostname).build()
+            .setHeader("routingkey", messageDataDTO.slackUserId).build()
         streamBridge.send("notificationFailedEvent-out-0",
             message)
-        log.info("Failed event: message was sent to $hostname")
+        log.info("Failed event: message was sent to ${messageDataDTO.slackUserId}")
         if (log.isDebugEnabled) log.debug("message payload: \n$payload")
     }
 }
