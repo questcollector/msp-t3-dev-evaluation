@@ -17,7 +17,7 @@ class NotificationEventPublisher(
         val payload = """
             Excellent @${messageDataDTO.slackUserName}, 
             You have successfully completed the development practice assignment
-            You can check the UUID below in the DM on Slack
+            You can check the same UUID below in the DM on Slack
             ==========================================
             ${messageDataDTO.uuid}
             ==========================================
@@ -33,7 +33,7 @@ class NotificationEventPublisher(
 
     suspend fun publishNotificationFailedEvent(messageDataDTO: MessageDataEntity) {
         val payload = """
-            This is reply to the message from ${messageDataDTO.instanceId}.
+            This is reply to the message from EC2 instance which id is ${messageDataDTO.instanceId}.
             The requirement was not fulfilled. Please check the following information.
             1. Please check "slack.user.id" property in application.properties file.
             2. Please check implementation of "CampaignEventChannelInterceptor.preSend()" method.
