@@ -42,7 +42,7 @@ spring:
               routingKeyExpression: "headers['routingkey']"
 slack:
   user:
-    token: ${SLACK_USER_TOKEN:dummy-token}
+    token: ${SLACK_BOT_TOKEN:dummy-token}
 
 ---
 
