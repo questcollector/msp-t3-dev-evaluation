@@ -29,28 +29,29 @@ class EvaluationResultService (
             reason = "메시지 없음"
         } else {
             val passedMessages = messages.filter {
-                (it.isPass // 통과한 메시지만 필터링
-                        && (it.sentDateTime!!.isAfter(startDateTime) || it.sentDateTime.isEqual(startDateTime))
-                        && it.sentDateTime.isBefore(endDateTime))
+                (it.sentDateTime.isAfter(startDateTime) || it.sentDateTime.isEqual(startDateTime))
+                        && it.sentDateTime.isBefore(endDateTime)
             }
-            val hostname = passedMessages.map {
+            val instanceId = passedMessages.map {
                 it.instanceId
-            }.toSet()
+            }.filterNotNull()
+                .toSet()
 
             val ipAddress = passedMessages.map {
                 it.ipAddress
-            }.toSet()
+            }.filterNotNull()
+                .toSet()
 
             if (log.isDebugEnabled) {
                 log.debug("passed Message Count: ${passedMessages.count()}")
-                log.debug("hostname: $hostname")
+                log.debug("instanceId: $instanceId")
                 log.debug("ipAddress: $ipAddress")
             }
 
-            if (hostname.isEmpty() || ipAddress.isEmpty()) {
+            if (instanceId.isEmpty() || ipAddress.isEmpty()) {
                 result = false
                 reason = "통과한 메시지 없음"
-            } else if (hostname.count() > 1 || ipAddress.count() > 1) {
+            } else if (instanceId.count() > 1 || ipAddress.count() > 1) {
                 result = false
                 reason = "다른 VM에서 실행한 것으로 보임"
             }
