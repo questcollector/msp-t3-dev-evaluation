@@ -31,6 +31,7 @@ class SlackMessagingService (
 
         val directChannel = getDirectChannel(message.slackUserId!!)
         if (log.isDebugEnabled) log.debug("directChannel: $directChannel")
+        if (!directChannel.isOk) throw NoSuchElementException(message.slackUserId)
 
         val response = slack.methodsAsync(slackToken).chatPostMessage(
             ChatPostMessageRequest.builder()
@@ -68,7 +69,7 @@ class SlackMessagingService (
                 } else {
                     log.info("Error on getDirectChannels: ${t.error}")
                     if (log.isDebugEnabled) log.debug("$t")
-                    it.resumeWithException(u)
+                    it.resume(t)
                 }
             }
         }

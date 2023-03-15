@@ -47,7 +47,7 @@ class MessageDataCommandService (
         return MessageDataEntity(
             null,
             sentDateTime,
-            headers["Hostname"] as? String,
+            headers["InstanceId"] as? String,
             headers["IpAddress"] as? String,
             headers["SlackUserId"] as? String,
             slackUserName,
@@ -63,16 +63,16 @@ class MessageDataCommandService (
     fun calculateIsPass(headers: MessageHeaders,
                                 slackUserName: String?): Boolean {
 
-        val hostname: String? = headers["Hostname"] as? String
+        val instanceId: String? = headers["InstanceId"] as? String
         val ipAddress: String? = headers["IpAddress"] as? String
-        val hostnameRegex = Regex("EC2AMAZ-[0-9A-Z]{7}")
+        val instanceIdRegex = Regex("i-[0-9a-z]{17}")
         val ipAddressRegex = Regex("172\\.31\\.\\d{1,3}\\.\\d{1,3}")
 
-        hostname ?: return false
+        instanceId ?: return false
         ipAddress ?: return false
         slackUserName ?: return false
 
-        if (!hostnameRegex.matches(hostname)) return false
+        if (!instanceIdRegex.matches(instanceId)) return false
         if (!ipAddressRegex.matches(ipAddress)) return false
         
         return true
