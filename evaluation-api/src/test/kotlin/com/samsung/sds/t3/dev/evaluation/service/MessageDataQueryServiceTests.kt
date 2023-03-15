@@ -72,9 +72,10 @@ class MessageDataQueryServiceTests {
 
     @Test
     fun `특정 유저의 모든 메시지 조회`() {
+        val NOW = LocalDateTime.now().withNano(0)
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(slackUserName = "test"))
-            emit(MessageDataEntity(slackUserName = "test"))
+            emit(MessageDataEntity(sentDateTime = NOW, slackUserName = "test"))
+            emit(MessageDataEntity(sentDateTime = NOW, slackUserName = "test"))
         }
 
         coEvery { messageDataRepository.findAllBySlackUserNameStartsWith("test") } returns entities
