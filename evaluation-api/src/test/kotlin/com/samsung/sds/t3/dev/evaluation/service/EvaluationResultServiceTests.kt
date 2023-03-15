@@ -26,8 +26,8 @@ class EvaluationResultServiceTests {
     @Test
     fun `startDate, endDate 지정하지 않은 상태`() {
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, hostname = "hostname", ipAddress = "ipaddress"))
-            emit(MessageDataEntity(sentDateTime = YESTERDAY.minusDays(1), isPass = true, hostname = "hostname", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY.minusDays(1), isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
 
         coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
@@ -46,8 +46,8 @@ class EvaluationResultServiceTests {
     @Test
     fun `startDate, endDate 지정한 경우`() {
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, hostname = "hostname", ipAddress = "ipaddress"))
-            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, hostname = "hostname", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
 
         coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
@@ -66,8 +66,8 @@ class EvaluationResultServiceTests {
     @Test
     fun `통과한 데이터 없는 경우`() {
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(sentDateTime = TODAY, hostname = "hostname", ipAddress = "ipaddress"))
-            emit(MessageDataEntity(sentDateTime = YESTERDAY, hostname = "hostname", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = TODAY, instanceId = "instanceId", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
         coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
 
@@ -98,10 +98,10 @@ class EvaluationResultServiceTests {
     }
 
     @Test
-    fun `hostname이 다른 경우`() {
+    fun `instanceId이 다른 경우`() {
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, hostname = "hostname", ipAddress = "ipaddress"))
-            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, hostname = "hostname2", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId2", ipAddress = "ipaddress"))
         }
 
         coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
@@ -120,8 +120,8 @@ class EvaluationResultServiceTests {
     @Test
     fun `ipAddress가 다른 경우`() {
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, hostname = "hostname", ipAddress = "ipaddress"))
-            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, hostname = "hostname", ipAddress = "ipaddress2"))
+            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress2"))
         }
 
         coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
