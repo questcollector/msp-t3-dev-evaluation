@@ -34,7 +34,7 @@ class MessageDataCommandServiceTests {
             .setHeader("SlackUserId", "id")
             .build()
 
-        var sentDateTime: LocalDateTime? = null
+        var sentDateTime = LocalDateTime.now().withNano(0)
         message.headers.timestamp?.run {
             val epochSecond = this / 1000
             val nano = this % 1000 * 1000000
