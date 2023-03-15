@@ -1,6 +1,5 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
-import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
@@ -25,15 +24,16 @@ class MessageDataQueryService (
 
         if (log.isDebugEnabled) log.debug("converted dateTime: \nstart: $start\nend: $end")
 
-        val messageDataEntities = messageDataRepository.findAllBySentDateTimeBetween(start, end)
+        val messageDataEntities = messageDataRepository.findAll()
 
-        return messageDataEntities.mapNotNull {
-            entity -> entity.toMessageDataDTO()
-        }
+        return messageDataEntities
+            .filterNotNull()
+            .filter { it.sentDateTime.isAfter(startDateTime) && it.sentDateTime.isBefore(endDateTime) }
+            .map { entity -> entity.toMessageDataDTO() }
     }
 
     suspend fun getMessageDataWithSlackUserName(slackUserName: String): Flow<MessageDataDTO> {
-        val messageDataEntities = messageDataRepository.findAllBySlackUserName(slackUserName)
+        val messageDataEntities = messageDataRepository.findAllBySlackUserNameStartsWith(slackUserName)
 
         return messageDataEntities.mapNotNull {
                 entity -> entity.toMessageDataDTO()

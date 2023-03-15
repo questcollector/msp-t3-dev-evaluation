@@ -57,24 +57,10 @@ class MessageDataRepositoryTests (
         }
     }
 
-
-    @Test
-    fun `특정 기간 사이의 모든 메시지 조회하기`() {
-        runBlocking {
-            val result = messageDataRepository.findAllBySentDateTimeBetween(
-                YESTERDAY.minusHours(1),
-                TODAY.plusHours(1)
-            ).toList()
-            assertThat(result.toList()).containsAll(
-                entities.subList(0, 2)
-            )
-        }
-    }
-
     @Test
     fun `유저 이름으로 보낸 메시지 조회하기`() {
         runBlocking {
-            val result = messageDataRepository.findAllBySlackUserName(TEST)
+            val result = messageDataRepository.findAllBySlackUserNameStartsWith(TEST)
             assertThat(result.toList()).containsAll(
                 entities.subList(2, 4)
             )

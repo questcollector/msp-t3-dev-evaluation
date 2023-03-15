@@ -31,7 +31,7 @@ class MessageDataQueryServiceTests {
             emit(MessageDataEntity(sentDateTime = YESTERDAY))
         }
 
-        coEvery { messageDataRepository.findAllBySentDateTimeBetween(YESTERDAY, TODAY) } returns entities
+        coEvery { messageDataRepository.findAll() } returns entities
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
@@ -56,7 +56,7 @@ class MessageDataQueryServiceTests {
             emit(MessageDataEntity(sentDateTime = YESTERDAY.minusDays(1)))
         }
 
-        coEvery { messageDataRepository.findAllBySentDateTimeBetween(any(), any()) } returns entities.take(1)
+        coEvery { messageDataRepository.findAll() } returns entities
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
@@ -76,7 +76,7 @@ class MessageDataQueryServiceTests {
             emit(MessageDataEntity(slackUserName = "test"))
         }
 
-        coEvery { messageDataRepository.findAllBySlackUserName("test") } returns entities
+        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith("test") } returns entities
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
