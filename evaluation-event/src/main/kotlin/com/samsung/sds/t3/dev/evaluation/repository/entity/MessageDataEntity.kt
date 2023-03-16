@@ -1,7 +1,6 @@
 package com.samsung.sds.t3.dev.evaluation.repository.entity
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import java.util.*
@@ -9,14 +8,17 @@ import java.util.*
 @Document(collection = "message_data")
 data class MessageDataEntity (
     @Id
-    val id: UUID? = null,
-    val sentDateTime: LocalDateTime = LocalDateTime.now(),
+    val id: UUID = UUID.randomUUID(),
+    val sentDateTime: LocalDateTime = LocalDateTime.now().roundMillis(),
     val instanceId: String? = null,
     val ipAddress: String? = null,
     val slackUserId: String? = null,
     val slackUserName: String? = null,
     val payload: String? = null,
-    val isPass: Boolean = false,
-    @Indexed(unique = true)
-    val uuid: UUID? = null
+    val isPass: Boolean = false
 ) { }
+
+private fun LocalDateTime.roundMillis(): LocalDateTime {
+    val millis = this.nano / 1000
+    return this.withNano(millis * 1000)
+}

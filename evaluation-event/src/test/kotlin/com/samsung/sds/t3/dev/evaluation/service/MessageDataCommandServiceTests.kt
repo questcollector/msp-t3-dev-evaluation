@@ -50,8 +50,7 @@ class MessageDataCommandServiceTests {
             slackUserId = "id",
             slackUserName = "test",
             payload = campaignDTO.toString(),
-            isPass = false,
-            uuid = UUID.randomUUID()
+            isPass = false
         )
 
         coEvery { slackUserInfoService.getSlackUserNameWithSlackUserId("id") } returns "test"

@@ -69,8 +69,8 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         val message = MessageDataEntity(
-            slackUserId = userId,
-            uuid = UUID.randomUUID()
+            id = UUID.randomUUID(),
+            slackUserId = userId
         )
 
         runBlocking {
@@ -86,8 +86,7 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         val message = MessageDataEntity(
-            slackUserId = "<<SLACK_USER_ID>>",
-            uuid = UUID.randomUUID()
+            slackUserId = "<<SLACK_USER_ID>>"
         )
 
         runBlocking {

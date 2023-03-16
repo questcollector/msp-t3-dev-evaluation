@@ -92,7 +92,7 @@ class SlackMessagingService (
             You have successfully completed the development practice assignment.
             You can check the same UUID below in the console logs on IntelliJ.
             ==========================================
-            ${message.uuid}
+            ${message.id}
             ==========================================
             
         """.trimIndent()

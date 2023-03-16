@@ -52,8 +52,7 @@ class MessageDataCommandService (
             headers["SlackUserId"] as? String,
             slackUserName,
             payload.toString(),
-            isPass,
-            UUID.randomUUID()
+            isPass
         )
     }
 
