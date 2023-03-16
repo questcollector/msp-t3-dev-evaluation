@@ -3,8 +3,8 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
 ### cloud9
 sudo apt update
-sudo apt install python2.7 build-essential nodejs -y
-curl -L https://raw.githubusercontent.com/c9/install/master/install.sh | bash
+# sudo apt install python2.7 build-essential nodejs -y
+# curl -L https://raw.githubusercontent.com/c9/install/master/install.sh | bash
 
 ### awscli
 sudo apt install awscli -y
@@ -28,7 +28,7 @@ echo \
 
 sudo apt-get update
 
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose -y
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
 
 ### sudo usermod -aG docker ubuntu
 ### newgrp docker

@@ -43,8 +43,8 @@ EOF
 fi
 
 if [ ! -f "./.env" ]; then
-echo "Enter SLACK_USER_TOKEN: "
-read -rs slack_user_token
+echo "Enter SLACK_BOT_TOKEN: "
+read -rs slack_bot_token
 
 erlang_cookie_random=$(base64 /dev/urandom | head -c32)
 
@@ -58,7 +58,7 @@ MONGO_USER=eval
 MONGO_PASSWORD=$rand_passwd
 RABBITMQ_HOST=rabbit
 RABBITMQ_ERLANG_COOKIE=$erlang_cookie_random
-SLACK_USER_TOKEN=$slack_user_token
+SLACK_BOT_TOKEN=$slack_bot_token
 TZ=Asia/Seoul
 EOF
 fi
