@@ -19,7 +19,7 @@ class NotificationEventPublisher(
             You have successfully completed the development practice assignment
             You can check the same UUID below in the DM on Slack
             ==========================================
-            ${messageDataDTO.uuid}
+            ${messageDataDTO.id}
             ==========================================
             
         """.trimIndent()

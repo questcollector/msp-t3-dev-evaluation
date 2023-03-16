@@ -41,7 +41,7 @@ class MessageDataHandlerTests {
                 .willReturn(messageDataDTO)
         }
 
-        wtc.get().uri("/api/messageData/uuid/${messageDataDTO.messageId!!}")
+        wtc.get().uri("/api/messageData/${messageDataDTO.messageId}")
             .exchange()
             .expectStatus().isOk
             .expectBody()

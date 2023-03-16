@@ -47,7 +47,7 @@ class MessageDataRepositoryTests (
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
-            entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, uuid = SAMPLE_UUID)))
+            entities.add(messageDataRepository.save(MessageDataEntity(id = SAMPLE_UUID, sentDateTime = NOW)))
         }
     }
 
@@ -71,7 +71,7 @@ class MessageDataRepositoryTests (
     @Test
     fun `특정 uuid 데이터 조회`() {
         runBlocking {
-            val result = messageDataRepository.findByUuid(SAMPLE_UUID)
+            val result = messageDataRepository.findById(SAMPLE_UUID)
             assertThat(result).isEqualTo(entities[4])
         }
     }

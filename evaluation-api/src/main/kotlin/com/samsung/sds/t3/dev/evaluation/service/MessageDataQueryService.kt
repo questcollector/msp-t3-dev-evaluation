@@ -43,7 +43,7 @@ class MessageDataQueryService (
     suspend fun getMessageDataByMessageUuid(messageId: String) : MessageDataDTO?
     {
         return try {
-            messageDataRepository.findByUuid(UUID.fromString(messageId))?.toMessageDataDTO()
+            messageDataRepository.findById(UUID.fromString(messageId))?.toMessageDataDTO()
         } catch (e: IllegalArgumentException) {
             log.info("uuid is not a valid form: $messageId")
             null

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @Service
@@ -45,15 +46,14 @@ class MessageDataCommandService (
         if (log.isDebugEnabled) log.debug("converted")
 
         return MessageDataEntity(
-            null,
-            sentDateTime?: LocalDateTime.now(),
+            UUID.randomUUID(),
+            sentDateTime?: LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
             headers["InstanceId"] as? String,
             headers["IpAddress"] as? String,
             headers["SlackUserId"] as? String,
             slackUserName,
             payload.toString(),
-            isPass,
-            UUID.randomUUID()
+            isPass
         )
     }
 

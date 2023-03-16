@@ -32,7 +32,6 @@ class MessageDataRepositoryTests (
 
     private val TODAY = LocalDateTime.parse("2023-02-22T23:57:06.578")
     private val YESTERDAY = TODAY.minusDays(1)
-    private val SAMPLE_UUID = UUID.randomUUID()
     private val entities : MutableList<MessageDataEntity> =
         mutableListOf()
 
@@ -43,7 +42,7 @@ class MessageDataRepositoryTests (
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
             entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
-            entities.add(messageDataRepository.save(MessageDataEntity(uuid = SAMPLE_UUID)))
+            entities.add(messageDataRepository.save(MessageDataEntity()))
         }
     }
 

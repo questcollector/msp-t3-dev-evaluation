@@ -8,11 +8,11 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -34,7 +34,7 @@ class MessageDataCommandServiceTests {
             .setHeader("SlackUserId", "id")
             .build()
 
-        var sentDateTime = LocalDateTime.now().withNano(0)
+        var sentDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         message.headers.timestamp?.run {
             val epochSecond = this / 1000
             val nano = this % 1000 * 1000000
@@ -44,15 +44,14 @@ class MessageDataCommandServiceTests {
         }
 
         val entity = MessageDataEntity(
-            id = ObjectId.get(),
+            id = UUID.randomUUID(),
             sentDateTime = sentDateTime,
             instanceId = "instanceId",
             ipAddress = "ipAddress",
             slackUserId = "id",
             slackUserName = "test",
             payload = campaignDTO.toString(),
-            isPass = false,
-            uuid = UUID.randomUUID()
+            isPass = false
         )
 
         coEvery { slackUserInfoService.getSlackUserNameWithSlackUserId("id") } returns "test"

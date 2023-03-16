@@ -16,7 +16,18 @@ if [ ! -f "$init_mongo" ]; then
 cat <<EOF > "$init_mongo"
 db = new Mongo().getDB("students");
 
-db.createCollection('message_data', { capped: false });
+db.createCollection('message_data', {
+   validator: { \$jsonSchema: {
+      bsonType: "object",
+      properties: {
+         _id: {
+            bsonType: "binData",
+            description: "must be a UUID string and is required"
+         }
+      }
+   }},
+   validationAction: "error"
+});
 
 db.createUser({
     user: 'eval',
