@@ -27,7 +27,7 @@ class MessageDataRouter {
             method = arrayOf(RequestMethod.GET),
             beanClass = MessageDataHandler::class,
             beanMethod = "getMessageDataByMessageUuid",
-            path = "/api/messageData/uuid/{uuid}",
+            path = "/api/messageData/{uuid}",
             operation = Operation(
                 operationId = "getMessageDataByMessageUuid",
                 tags = ["MessageData"],
@@ -111,7 +111,7 @@ class MessageDataRouter {
         accept(MediaType.APPLICATION_JSON).nest {
             GET("/api/messageData/", messageDataHandler::getMessageDataList)
             GET("/api/messageData/slackUserName/{slackUserName}", messageDataHandler::getMessageDataListBySlackUserName)
-            GET("/api/messageData/uuid/{uuid}", messageDataHandler::getMessageDataByMessageUuid)
+            GET("/api/messageData/{uuid}", messageDataHandler::getMessageDataByMessageUuid)
         }
     }
 }
