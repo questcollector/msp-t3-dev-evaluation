@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -33,7 +34,7 @@ class MessageDataCommandServiceTests {
             .setHeader("SlackUserId", "id")
             .build()
 
-        var sentDateTime = LocalDateTime.now().withNano(0)
+        var sentDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         message.headers.timestamp?.run {
             val epochSecond = this / 1000
             val nano = this % 1000 * 1000000
