@@ -8,7 +8,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
@@ -44,7 +43,7 @@ class MessageDataCommandServiceTests {
         }
 
         val entity = MessageDataEntity(
-            id = ObjectId.get(),
+            id = UUID.randomUUID(),
             sentDateTime = sentDateTime,
             instanceId = "instanceId",
             ipAddress = "ipAddress",

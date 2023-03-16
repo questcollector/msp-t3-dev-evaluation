@@ -45,7 +45,7 @@ class MessageDataCommandService (
         if (log.isDebugEnabled) log.debug("converted")
 
         return MessageDataEntity(
-            null,
+            UUID.randomUUID(),
             sentDateTime?: LocalDateTime.now(),
             headers["InstanceId"] as? String,
             headers["IpAddress"] as? String,
