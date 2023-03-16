@@ -23,11 +23,17 @@ db.createCollection('message_data', {
          _id: {
             bsonType: "binData",
             description: "must be a UUID string and is required"
+         },
+         slackUserName: {
+            bsonType: "string",
+            description: "slack user name string and is nullable"
          }
       }
    }},
    validationAction: "error"
 });
+
+db.message_data.createIndex( { slackUserName: 1 } )
 
 db.createUser({
     user: 'eval',
