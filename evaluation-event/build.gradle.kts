@@ -6,7 +6,6 @@ plugins {
     kotlin("jvm") version "1.7.22"
     kotlin("plugin.spring") version "1.7.22"
     kotlin("plugin.jpa") version "1.7.22"
-    id("com.google.cloud.tools.jib") version "3.3.1"
 }
 
 group = "com.samsung.sds.t3.dev"
@@ -55,19 +54,4 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-jib {
-    from {
-        image = "amazoncorretto:17"
-        platforms {
-            platform {
-                architecture = "arm64"
-                os = "linux"
-            }
-        }
-    }
-    to {
-        image = "evaluation-event:test"
-    }
 }

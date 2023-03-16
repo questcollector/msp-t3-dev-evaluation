@@ -29,12 +29,12 @@ class MessageDataCommandServiceTests {
         )
         val message = org.springframework.messaging.support.MessageBuilder
             .withPayload(campaignDTO)
-            .setHeader("Hostname", "hostname")
+            .setHeader("InstanceId", "instanceId")
             .setHeader("IpAddress", "ipAddress")
             .setHeader("SlackUserId", "id")
             .build()
 
-        var sentDateTime: LocalDateTime? = null
+        var sentDateTime = LocalDateTime.now().withNano(0)
         message.headers.timestamp?.run {
             val epochSecond = this / 1000
             val nano = this % 1000 * 1000000
@@ -46,7 +46,7 @@ class MessageDataCommandServiceTests {
         val entity = MessageDataEntity(
             id = ObjectId.get(),
             sentDateTime = sentDateTime,
-            hostname = "hostname",
+            instanceId = "instanceId",
             ipAddress = "ipAddress",
             slackUserId = "id",
             slackUserName = "test",
@@ -76,7 +76,7 @@ class MessageDataCommandServiceTests {
     fun `통과 여부 계산 테스트`() {
         val message = org.springframework.messaging.support.MessageBuilder
             .withPayload(CampaignDTO())
-            .setHeader("Hostname", "EC2AMAZ-9ANEIJC")
+            .setHeader("InstanceId", "i-02ee325b303f77f4f")
             .setHeader("IpAddress", "172.31.19.216")
             .setHeader("SlackUserId", "id")
             .build()

@@ -15,7 +15,7 @@ import kotlin.NoSuchElementException
 class SlackMessagingServiceTests {
 
     private val slack = Slack.getInstance()
-    private val token = System.getenv("SLACK_USER_TOKEN")
+    private val token = System.getenv("SLACK_BOT_TOKEN")
     private val userId = System.getenv("SLACK_USER_ID")
     @BeforeEach
     fun `슬랙 테스트 사전점검`() {
@@ -24,7 +24,17 @@ class SlackMessagingServiceTests {
         val authTest = slack.methods(token).authTest(
             AuthTestRequest.builder().build()
         )
-        assumeTrue(authTest.isOk)
+        val scopes = authTest.httpResponseHeaders["x-oauth-scopes"]?.get(0)?.split(",")
+        assertThat(scopes).contains(
+            "channels:read",
+            "groups:read",
+            "im:read",
+            "im:write",
+            "incoming-webhook",
+            "mpim:read",
+            "users:read",
+            "chat:write"
+        )
     }
 
     @Test
@@ -33,10 +43,10 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         runBlocking {
-            val channels = slackMessagingService.getDirectChannels()
-            val directChannel = channels.channels.first { it.user == userId }
-            println(channels)
-            assertThat(directChannel.id).isNotEmpty
+            val directChannel = slackMessagingService.getDirectChannel(userId)
+
+            println(directChannel)
+            assertThat(directChannel.channel.user).isEqualTo(userId)
         }
     }
 
@@ -46,10 +56,10 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         runBlocking {
-            assertThrows<NoSuchElementException> {
-                slackMessagingService.getDirectChannels().channels
-                    .first { it.user == "<<SLACK_USER_ID>>" }
-            }
+            
+            val directChannel = slackMessagingService.getDirectChannel("<<SLACK_USER_ID>>")
+            assertThat(directChannel.error).isEqualTo("user_not_found")
+            
         }
     }
 

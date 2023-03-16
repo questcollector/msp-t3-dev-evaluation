@@ -24,7 +24,7 @@ import java.util.*
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 @ContextConfiguration(classes = [MessageDataHandler::class, MessageDataRouter::class])
-class MessageDataControllerTests {
+class MessageDataHandlerTests {
     @MockBean
     private lateinit var messageDataQueryService: MessageDataQueryService
     @Autowired

@@ -56,5 +56,7 @@ class MessageDataHandler(
         val result =  messageDataQueryService.getMessageDataWithSlackUserName(slackUserName)
         return ServerResponse.ok().json().bodyAndAwait(result)
     }
+
+
 }
 

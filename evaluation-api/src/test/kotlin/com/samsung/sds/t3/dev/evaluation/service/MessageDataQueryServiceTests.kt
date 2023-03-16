@@ -21,17 +21,17 @@ class MessageDataQueryServiceTests {
 
     private val messageDataRepository = mockk<MessageDataRepository>()
 
-    private val TODAY = LocalDateTime.now()
+    private val TODAY = LocalDateTime.now().withNano(0)
     private val YESTERDAY = TODAY.minusDays(1)
 
     @Test
     fun `특정 기간 동안 모든 메시지 조회`() {
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(sentDateTime = TODAY))
-            emit(MessageDataEntity(sentDateTime = YESTERDAY))
+            emit(MessageDataEntity(sentDateTime = TODAY.minusHours(1)))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY.plusHours(1)))
         }
 
-        coEvery { messageDataRepository.findAllBySentDateTimeBetween(YESTERDAY, TODAY) } returns entities
+        coEvery { messageDataRepository.findAll() } returns entities
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
@@ -39,6 +39,7 @@ class MessageDataQueryServiceTests {
             val result = messageDataQueryService.getMessageDataDuring(
                 YESTERDAY, TODAY
             )
+            println(result.toList())
 
             assertThat(result.toList()).containsAll(
                 entities.map {
@@ -52,11 +53,11 @@ class MessageDataQueryServiceTests {
     @Test
     fun `기간 설정 없이 메시지 조회`() {
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(sentDateTime = TODAY))
+            emit(MessageDataEntity(sentDateTime = TODAY.minusHours(1)))
             emit(MessageDataEntity(sentDateTime = YESTERDAY.minusDays(1)))
         }
 
-        coEvery { messageDataRepository.findAllBySentDateTimeBetween(any(), any()) } returns entities.take(1)
+        coEvery { messageDataRepository.findAll() } returns entities
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
@@ -71,12 +72,13 @@ class MessageDataQueryServiceTests {
 
     @Test
     fun `특정 유저의 모든 메시지 조회`() {
+        val NOW = LocalDateTime.now().withNano(0)
         val entities = flow<MessageDataEntity> {
-            emit(MessageDataEntity(slackUserName = "test"))
-            emit(MessageDataEntity(slackUserName = "test"))
+            emit(MessageDataEntity(sentDateTime = NOW, slackUserName = "test"))
+            emit(MessageDataEntity(sentDateTime = NOW, slackUserName = "test"))
         }
 
-        coEvery { messageDataRepository.findAllBySlackUserName("test") } returns entities
+        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith("test") } returns entities
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 

@@ -8,12 +8,9 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.models.info.Info
 import kotlinx.coroutines.FlowPreview
 import org.springdoc.core.annotations.RouterOperation
 import org.springdoc.core.annotations.RouterOperations
-import org.springdoc.core.models.GroupedOpenApi
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -23,14 +20,6 @@ import org.springframework.web.reactive.function.server.coRouter
 @Configuration
 class MessageDataRouter {
 
-    @Bean
-    fun messageDataOpenApi(@Value("\${springdoc.version:v1}") appVersion: String? = "v1"): GroupedOpenApi? {
-        val paths = "/api/messageData/**"
-        return GroupedOpenApi.builder().group("messageData")
-            .addOpenApiCustomizer { openApi -> openApi.info(Info().title("messageData API").version(appVersion)) }
-            .pathsToMatch(paths)
-            .build()
-    }
     @FlowPreview
     @Bean
     @RouterOperations(*arrayOf(
@@ -74,13 +63,13 @@ class MessageDataRouter {
                     Parameter(
                         `in` = ParameterIn.QUERY,
                         name = "startDate",
-                        description = "start LocalDateTime 2023-03-06T00:00:00",
+                        description = "start LocalDateTime 2023-03-06T00:00:00, excluded",
                         required = false
                     ),
                     Parameter(
                         `in` = ParameterIn.QUERY,
                         name = "endDate",
-                        description = "end LocalDateTime 2023-03-06T00:00:00",
+                        description = "end LocalDateTime 2023-03-06T00:00:00, excluded",
                         required = false
                     )
                              ],

@@ -1,6 +1,7 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
 import com.slack.api.Slack
+import com.slack.api.methods.request.auth.AuthTestRequest
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.slack.api.methods.request.conversations.ConversationsListRequest
 import com.slack.api.methods.request.users.UsersInfoRequest
@@ -12,16 +13,27 @@ import org.junit.jupiter.api.Test
 
 class SlackApiTests {
     private val slack = Slack.getInstance()
-    private val token = System.getenv("SLACK_USER_TOKEN")
+    private val token = System.getenv("SLACK_BOT_TOKEN")
     private val userId = System.getenv("SLACK_USER_ID")
 
     @BeforeEach
     fun `토큰이 있는지 점검`() {
         assumeTrue(token != null)
         assumeTrue(userId != null)
-        slack.methodsAsync().authTest {
-            it.token(token)
-        }.get()
+        val authTest = slack.methods(token).authTest(
+            AuthTestRequest.builder().build()
+        )
+        val scopes = authTest.httpResponseHeaders["x-oauth-scopes"]?.get(0)?.split(",")
+        assertThat(scopes).contains(
+            "channels:read",
+            "groups:read",
+            "im:read",
+            "im:write",
+            "incoming-webhook",
+            "mpim:read",
+            "users:read",
+            "chat:write"
+        )
     }
     @Test
     fun `유저 이름 검색 테스트`() {

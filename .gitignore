@@ -3,3 +3,5 @@
 db/
 rabbit-data/
 .env
+*.json
+.erlang.cookie

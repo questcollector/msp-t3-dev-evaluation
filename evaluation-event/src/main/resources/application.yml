@@ -11,6 +11,12 @@ spring:
   config:
     activate:
       on-profile: "common"
+  data:
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:students}
+      uuidRepresentation: standard
   rabbitmq:
     addresses: ${RABBITMQ_HOST:localhost}:${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:admin}
@@ -42,7 +48,7 @@ spring:
               routingKeyExpression: "headers['routingkey']"
 slack:
   user:
-    token: ${SLACK_USER_TOKEN:dummy-token}
+    token: ${SLACK_BOT_TOKEN:dummy-token}
 
 ---
 
@@ -52,12 +58,8 @@ spring:
       on-profile: "prod"
   data:
     mongodb:
-      host: ${MONGO_HOST:localhost}
-      port: ${MONGO_PORT:27017}
-      database: ${MONGO_DATABASE:students}
       username: ${MONGO_USER}
       password: ${MONGO_PASSWORD}
-      uuidRepresentation: standard
 
 ---
 
@@ -65,12 +67,6 @@ spring:
   config:
     activate:
       on-profile: "dev"
-  data:
-    mongodb:
-      host: ${MONGO_HOST:localhost}
-      port: ${MONGO_PORT:27017}
-      database: ${MONGO_DATABASE:students}
-      uuidRepresentation: standard
 server:
   port: 8090
 logging:

@@ -1,66 +1,90 @@
 version: "3.9"
 services:
   rabbitmq:
-    hostname: 'rabbit'
-    image: rabbitmq:management
-    container_name: 'rabbit'
-    restart: always
+    hostname: "rabbit"
+    image: "rabbitmq:management"
+    container_name: "rabbit"
+    restart: "always"
     ports:
       - "5672:5672"
       - "15672:15672"
-    env_file: './.env'
+    env_file: "./.env"
     volumes:
-      - './rabbit-data/:/var/lib/rabbitmq/mnesia'
+      - "./rabbit-data/:/var/lib/rabbitmq/mnesia"
     networks:
-      - evaluation
-  evaluation-api:
-    image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-api:latest'
-    container_name: evaluation-api
-    restart: on-failure
+      - "evaluation"
+  rabbitmq-node1:
+    hostname: "rabbit-node1"
+    image: "rabbitmq:management"
+    container_name: "rabbit-node1"
     depends_on:
-      - db
+      - "rabbitmq"
+    restart: "always"
+    env_file: "./.env"
+    networks:
+      - "evaluation"
+    links:
+      - "rabbitmq"
+  rabbitmq-node2:
+    hostname: "rabbit-node2"
+    image: "rabbitmq:management"
+    container_name: "rabbit-node2"
+    depends_on:
+      - "rabbitmq"
+    restart: "always"
+    env_file: "./.env"
+    networks:
+      - "evaluation"
+    links:
+      - "rabbitmq"
+  evaluation-api:
+    image: "275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-api:latest"
+    container_name: "evaluation-api"
+    restart: "on-failure"
+    depends_on:
+      - "db"
     ports:
       - "8080:8080"
-    env_file: './.env'
+    env_file: "./.env"
     command:
-      - '-Duser.timezone=Asia/Seoul'
-      - '--spring.profiles.active=prod'
+      - "-Duser.timezone=Asia/Seoul"
+      - "--spring.profiles.active=prod"
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '/usr/share/zoneinfo/Asia/Seoul:/etc/timezone:ro'
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/usr/share/zoneinfo/Asia/Seoul:/etc/timezone:ro"
     networks:
-      - evaluation
+      - "evaluation"
   evaluation-event:
-    image: '275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest'
+    image: "275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest"
     deploy:
       replicas: 3
     depends_on:
-      - rabbitmq
-      - db
-    restart: on-failure
-    env_file: './.env'
+      - "rabbitmq"
+      - "db"
+    restart: "on-failure"
+    env_file: "./.env"
     command:
-      - '-Duser.timezone=Asia/Seoul'
-      - '--spring.profiles.active=prod'
+      - "-Duser.timezone=Asia/Seoul"
+      - "--spring.profiles.active=prod"
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '/usr/share/zoneinfo/Asia/Seoul:/etc/timezone:ro'
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/usr/share/zoneinfo/Asia/Seoul:/etc/timezone:ro"
     networks:
       - evaluation
   db:
     image: mongo
-    container_name: 'mongo'
+    container_name: "mongo"
     ports:
       - "27017:27017"
     command:
-      - '--auth'
+      - "--auth"
     volumes:
-      - './db/data:/data/db'
-      - './db/initdb.d/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro'
-    env_file: './.env'
+      - "./db/data:/data/db"
+      - "./db/initdb.d/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro"
+    env_file: "./.env"
     networks:
-      - evaluation
-    restart: always
+      - "evaluation"
+    restart: "always"
 networks:
   evaluation:
-    driver: bridge
+    driver: "bridge"

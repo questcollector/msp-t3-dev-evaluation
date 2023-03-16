@@ -3,10 +3,9 @@ package com.samsung.sds.t3.dev.evaluation.service
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.request.conversations.ConversationsListRequest
+import com.slack.api.methods.request.conversations.ConversationsOpenRequest
 import com.slack.api.methods.response.chat.ChatPostMessageResponse
-import com.slack.api.methods.response.conversations.ConversationsListResponse
-import com.slack.api.model.ConversationType
+import com.slack.api.methods.response.conversations.ConversationsOpenResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -30,13 +29,14 @@ class SlackMessagingService (
     suspend fun postMessage(message: MessageDataEntity) : ChatPostMessageResponse {
         val payload = buildMessageContent(message)
 
-        val channels = getDirectChannels()
-        val directChannel = channels.channels.first { it.user == message.slackUserId }
+        val directChannel = getDirectChannel(message.slackUserId!!)
+        if (log.isDebugEnabled) log.debug("directChannel: $directChannel")
+        if (!directChannel.isOk) throw NoSuchElementException(message.slackUserId)
 
         val response = slack.methodsAsync(slackToken).chatPostMessage(
             ChatPostMessageRequest.builder()
                 .text(payload)
-                .channel(directChannel.id)
+                .channel(directChannel.channel.id)
                 .build()
         )
         return suspendCoroutine {
@@ -54,11 +54,12 @@ class SlackMessagingService (
         }
     }
 
-    @Cacheable(cacheNames = arrayOf("directChannels"))
-    suspend fun getDirectChannels() : ConversationsListResponse {
-        val response = slack.methodsAsync(slackToken).conversationsList(
-            ConversationsListRequest.builder()
-                .types(mutableListOf(ConversationType.IM))
+    @Cacheable(cacheNames = arrayOf("directChannels"), key = "#slackUserId")
+    suspend fun getDirectChannel(slackUserId : String) : ConversationsOpenResponse {
+        val response = slack.methodsAsync(slackToken).conversationsOpen(
+            ConversationsOpenRequest.builder()
+                .returnIm(true)
+                .users(listOf(slackUserId))
                 .build()
         )
         return suspendCoroutine {
@@ -68,7 +69,7 @@ class SlackMessagingService (
                 } else {
                     log.info("Error on getDirectChannels: ${t.error}")
                     if (log.isDebugEnabled) log.debug("$t")
-                    it.resumeWithException(u)
+                    it.resume(t)
                 }
             }
         }
@@ -87,10 +88,11 @@ class SlackMessagingService (
      */
     private fun buildMessageContent(message: MessageDataEntity): String {
         return """
-            <@${message.slackUserId}>님 개발 실습참여도 과제를 성공적으로 수행하였습니다.
-            아래는 과제 제출 시 입력할 UUID 문자열입니다.
+            Excellent <@${message.slackUserId}>, 
+            You have successfully completed the development practice assignment.
+            You can check the same UUID below in the console logs on IntelliJ.
             ==========================================
-            *${message.uuid}*
+            ${message.uuid}
             ==========================================
             
         """.trimIndent()

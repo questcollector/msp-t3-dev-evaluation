@@ -26,27 +26,28 @@ class MessageDataCommandService (
 
         val headers: MessageHeaders = messageDataDTO.headers
         val payload: CampaignDTO = messageDataDTO.payload
-        val slackUserName: String? =
-            slackUserInfoService.getSlackUserNameWithSlackUserId(headers["SlackUserId"] as String)
+        val slackUserName: String? = headers["SlackUserId"]?.run {
+            slackUserInfoService.getSlackUserNameWithSlackUserId(this as String)
+        }
+
         val isPass: Boolean = calculateIsPass(headers, slackUserName)
 
-        var sentDateTime: LocalDateTime? = null
-        headers.timestamp?.run {
+        val sentDateTime: LocalDateTime? = headers.timestamp?.run {
             val epochSecond = this / 1000
             val nano = this % 1000 * 1000000
-            sentDateTime = LocalDateTime.ofEpochSecond(
-                    epochSecond,
-                    nano.toInt(),
-                    ZoneOffset.ofHours(9)
-                )
+            LocalDateTime.ofEpochSecond(
+                epochSecond,
+                nano.toInt(),
+                ZoneOffset.ofHours(9)
+            )
         }
 
         if (log.isDebugEnabled) log.debug("converted")
 
         return MessageDataEntity(
             null,
-            sentDateTime,
-            headers["Hostname"] as? String,
+            sentDateTime?: LocalDateTime.now(),
+            headers["InstanceId"] as? String,
             headers["IpAddress"] as? String,
             headers["SlackUserId"] as? String,
             slackUserName,
@@ -62,16 +63,16 @@ class MessageDataCommandService (
     fun calculateIsPass(headers: MessageHeaders,
                                 slackUserName: String?): Boolean {
 
-        val hostname: String? = headers["Hostname"] as? String
+        val instanceId: String? = headers["InstanceId"] as? String
         val ipAddress: String? = headers["IpAddress"] as? String
-        val hostnameRegex = Regex("EC2AMAZ-[0-9A-Z]{7}")
+        val instanceIdRegex = Regex("i-[0-9a-z]{17}")
         val ipAddressRegex = Regex("172\\.31\\.\\d{1,3}\\.\\d{1,3}")
 
-        hostname ?: return false
+        instanceId ?: return false
         ipAddress ?: return false
         slackUserName ?: return false
 
-        if (!hostnameRegex.matches(hostname)) return false
+        if (!instanceIdRegex.matches(instanceId)) return false
         if (!ipAddressRegex.matches(ipAddress)) return false
         
         return true
