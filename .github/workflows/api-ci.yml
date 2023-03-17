@@ -1,0 +1,56 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    paths:
+      - 'evaluation-api/**'
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:    
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        
+    - name: Gradle build
+      run: |
+        cd evaluation-api/
+        ./gradlew build
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::275291497228:role/github-actions-ecr-full-access
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR Private
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: evaluation-api
+      with:
+        context: ./evaluation-api
+        push: true
+        tags: |
+          $REGISTRY/$REPOSITORY:latest
