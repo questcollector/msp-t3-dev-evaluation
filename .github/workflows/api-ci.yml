@@ -47,11 +47,8 @@ jobs:
       
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
-      env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: evaluation-api
       with:
         context: ./evaluation-api
         push: true
         tags: |
-          $REGISTRY/$REPOSITORY:latest
+          275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-api:latest
