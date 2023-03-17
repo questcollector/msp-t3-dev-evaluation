@@ -34,6 +34,12 @@ docker compose 실행 전 스크립트를 실행합니다.
 
 docker-compose 정의 파일
 
+docker compose 실행 시 다음 명령어 입력
+
+```bash
+docker compose up -d
+```
+
 ## rabbitmq 라우팅 키 설정
 
 rabbitmq 설정 JSON 파일
