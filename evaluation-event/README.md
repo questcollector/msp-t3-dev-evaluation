@@ -2,6 +2,12 @@
 
 ## Spring webflux with Kotlin
 
+## Slack Bot 만들기
+
+아래 문서를 참조하여 slack bot을 생성한 다음 slack bot user token을 사용합니다.
+
+🔗 https://tall-fuel-e5e.notion.site/4-Slack-bot-fedf51dd032f4fe895d73443847115fc
+
 ## 로컬에서 구동 시
 
 1. docker-compose-dev.yml로 rabbitmq, mongodb 실행
