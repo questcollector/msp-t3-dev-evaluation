@@ -43,7 +43,7 @@ jobs:
         
     - name: Gradle build
       run: |
-        cd evaluation-api/
+        cd evaluation-event/
         ./gradlew build
         
     - name: Configure AWS credentials
