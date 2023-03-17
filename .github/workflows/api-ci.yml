@@ -5,7 +5,7 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: Java CI with Gradle
+name: evaluation-api ci pipeline
 
 on:
   push:
@@ -29,6 +29,16 @@ jobs:
       with:
         java-version: '17'
         distribution: zulu
+    
+    - name: Gradle Caching
+      uses: actions/cache@v3
+      with:
+        path: |  
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+            ${{ runner.os }}-gradle-
         
     - name: Gradle build
       run: |
@@ -52,3 +62,5 @@ jobs:
         push: true
         tags: |
           275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-api:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
