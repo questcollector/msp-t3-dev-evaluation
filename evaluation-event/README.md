@@ -2,7 +2,7 @@
 
 ## Spring webflux with Kotlin
 
-## Slack Bot 만들기
+## Slack Bot 만들기 
 
 아래 문서를 참조하여 slack bot을 생성한 다음 slack bot user token을 사용합니다.
 
