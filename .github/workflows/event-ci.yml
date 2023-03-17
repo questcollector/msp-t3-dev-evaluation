@@ -29,6 +29,7 @@ jobs:
       with:
         java-version: '17'
         distribution: zulu
+        cache: 'gradle'
     
     - name: Gradle Caching
       uses: actions/cache@v3
@@ -62,5 +63,4 @@ jobs:
         push: true
         tags: |
           275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=registry,ref=275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest
