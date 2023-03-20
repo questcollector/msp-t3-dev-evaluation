@@ -88,3 +88,9 @@ Code
 .github/workflows 하위의 두 파일을 확인
 - [api-ci.yml](api-ci.yml)
 - [event-ci.yml](event-ci.yml)
+
+workflow 실행
+
+Actions > workflow 선택 > Run workflow
+
+![img.png](img/run-workflow.png)

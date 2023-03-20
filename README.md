@@ -1,10 +1,15 @@
 # 실습 과제 평가용 스택
 
-## ubuntu ec2 instance
+## ubuntu EC2 instance
 
+- security group port 목록
+  - tcp/8080: evaluation-api
+  - tcp/27017: mongodb
+  - tcp/5672: amqp
+  - tcp/15672: rabbitmq-management
 - awscli, docker설치
-- [`./userdata.txt`](userdata.txt)
-- ecr image 권한(이미지는 아직 공유 안되어서 직접 빌드해야함)
+  - [`./userdata.txt`](userdata.txt)
+- ECR image 접근 권한(instance profile에 포함되어야 하는 정책)
   - `AmazonEC2ContainerRegistryReadOnly`
 - docker login
   ```bash
@@ -12,7 +17,7 @@
   ```
   문의 [miroirs01@gmail.com](mailto:miroirs01@gmail.com)
 
-## Requirement
+## Slack application
 
 Slack app을 생성하여 SLACK_BOT_TOKEN을 이용해야 합니다.
 
@@ -22,17 +27,19 @@ Slack app을 생성하여 SLACK_BOT_TOKEN을 이용해야 합니다.
 
 ## init-settings.sh
 
+[`init-settings.sh`](init-settings.sh)
+
 환경 변수, 초기 상태에 대한 설정파일
 
 docker compose 실행 전 스크립트를 실행합니다.
 
 `Enter SLACK_BOT_TOKEN`이 나오면 입력한 후 Enter키를 입력합니다.
 
-![img.png](img/init-settings.png)
+![init-settings](img/init-settings.png)
 
 ## docker-compose.yml
 
-docker-compose 정의 파일
+[`docker-compose.yml`](docker-compose.yml)
 
 docker compose 실행 시 다음 명령어 입력
 
@@ -42,7 +49,7 @@ docker compose up -d
 
 ## rabbitmq 라우팅 키 설정
 
-rabbitmq 설정 JSON 파일
+rabbitmq의 계정 별 권한 및 exchange와 queue 설정 JSON 파일
 
 문의 [miroirs01@gmail.com](mailto:miroirs01@gmail.com)
 
@@ -52,7 +59,7 @@ rabbitmq 설정 JSON 파일
 
 클러스터링을 하고자 한다면 아래와 같이 할 수 있습니다.
 
-docker-compose로 실행 후 rabbit-node1, rabbit-node2 컨테이너에 다음 명령어를 실행하여 클러스터링합니다.
+docker compose로 실행 후 rabbit-node1, rabbit-node2 컨테이너에 다음 명령어를 실행하여 클러스터링합니다.
 ```bash
 docker exec -it rabbit-node1 bash
 ```
@@ -64,6 +71,8 @@ exit
 ```
 
 ## 로컬에서 실행
+
+[`docker-compsoe-dev.yml`](docker-compose-dev.yml)
 
 1. RabbitMQ와 MongoDB는 Docker compose로 구동할 수 있음
    ```shell
@@ -77,7 +86,7 @@ exit
    - JSON설정 파일을 rabbitmq management에서  
      :link: http://localhost:15672  </br>
      Overview > Import definitions 에 업로드하여 Upload broker definitions 버튼을 클릭합니다.
-     ![](img/rabbitmq-management.png)</br>
+     ![rabbitmq-management](img/rabbitmq-management.png)</br>
    - rabbitmq 설정 JSON 파일 문의 [miroirs01@gmail.com](mailto:miroirs01@gmail.com)
    - 적용 후 logout 하고 admin 계정으로 로그인합니다.
 3. evaluation-api 실행
