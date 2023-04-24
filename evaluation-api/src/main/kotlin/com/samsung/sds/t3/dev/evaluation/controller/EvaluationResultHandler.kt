@@ -15,17 +15,17 @@ class EvaluationResultHandler(
     private val evaluationResultService: EvaluationResultService
 ) {
     private val log : Logger = LoggerFactory.getLogger(this.javaClass)
-    suspend fun getEvaluationResultBySlackUserName(request: ServerRequest) : ServerResponse {
-        val slackUserName = request.queryParamOrNull("slackUserName")
+    suspend fun getEvaluationResultBySlackUserId(request: ServerRequest) : ServerResponse {
+        val slackUserId = request.queryParamOrNull("slackUserId")
         val startDate = request.queryParamOrNull("startDate")
         val endDate = request.queryParamOrNull("endDate")
         if (log.isDebugEnabled) {
-            log.debug("slackUserName: $slackUserName")
+            log.debug("slackUserId: $slackUserId")
             log.debug("startDate: $startDate")
             log.debug("endDate: $endDate")
         }
 
-        slackUserName ?: return ServerResponse.notFound().buildAndAwait()
+        slackUserId ?: return ServerResponse.notFound().buildAndAwait()
 
         var startDateTime = LocalDateTime.MIN
         startDate?.run {
@@ -44,7 +44,7 @@ class EvaluationResultHandler(
             }
         }
 
-        val result = evaluationResultService.getEvaluationResultBySlackUserName(slackUserName, startDateTime, endDateTime)
+        val result = evaluationResultService.getEvaluationResultBySlackUserId(slackUserId, startDateTime, endDateTime)
         return ServerResponse.ok().json().bodyValueAndAwait(result)
     }
 }

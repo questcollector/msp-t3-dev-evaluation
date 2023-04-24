@@ -11,4 +11,7 @@ import java.util.*
 interface MessageDataRepository: CoroutineCrudRepository<MessageDataEntity, UUID> {
 
     fun findAllBySlackUserNameStartsWith(slackName: String) : Flow<MessageDataEntity>
+    fun findAllBySlackUserId(slackId: String) : Flow<MessageDataEntity>
+
+    fun findAllByInstanceId(instanceId: String) : Flow<MessageDataEntity>
 }

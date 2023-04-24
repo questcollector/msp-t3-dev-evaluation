@@ -26,13 +26,13 @@ class EvaluationResultRouter {
             beanMethod = "getEvaluationResultBySlackUserName",
             path = "/api/evaluation/slackUserName/",
             operation = Operation(
-                operationId = "getEvaluationResultBySlackUserName",
+                operationId = "getEvaluationResultBySlackUserId",
                 tags = ["Evaluation"],
                 parameters = [
                     Parameter(
                         `in` = ParameterIn.QUERY,
-                        name = "slackUserName",
-                        description = "slack member Name like 홍길동",
+                        name = "slackUserId",
+                        description = "slack member id like UXXXXXXXXXX",
                         required = true
                     ),
                     Parameter(
@@ -60,7 +60,7 @@ class EvaluationResultRouter {
     ))
     fun evaluationRoutes(evaluationResultHandler: EvaluationResultHandler) = coRouter {
         accept(MediaType.APPLICATION_JSON).nest {
-            GET("/api/evaluation/slackUserName/", evaluationResultHandler::getEvaluationResultBySlackUserName)
+            GET("/api/evaluation/slackUserId/", evaluationResultHandler::getEvaluationResultBySlackUserId)
         }
     }
 }

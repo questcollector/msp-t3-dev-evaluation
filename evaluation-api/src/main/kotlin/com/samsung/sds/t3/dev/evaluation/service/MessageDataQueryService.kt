@@ -40,6 +40,14 @@ class MessageDataQueryService (
         }
     }
 
+    suspend fun getMessageDataWithInstanceId(instanceId: String): Flow<MessageDataDTO> {
+        val messageDataEntities = messageDataRepository.findAllByInstanceId(instanceId)
+
+        return messageDataEntities.mapNotNull {
+            entity -> entity.toMessageDataDTO()
+        }
+    }
+
     suspend fun getMessageDataByMessageUuid(messageId: String) : MessageDataDTO?
     {
         return try {

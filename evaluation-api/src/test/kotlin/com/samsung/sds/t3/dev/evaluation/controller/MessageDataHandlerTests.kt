@@ -115,4 +115,25 @@ class MessageDataHandlerTests {
                 messageDTOList[0], messageDTOList[1]
             )
     }
+
+    @Test
+    fun `특정 인스턴스에서 보내진 모든 메시지 조회`() {
+        val messageDTOList = listOf<MessageDataDTO>(
+            MessageDataDTO(instanceId = "test"),
+            MessageDataDTO(instanceId = "test"))
+        messageDTOList.forEach { println(it) }
+
+        runBlocking {
+            given(messageDataQueryService.getMessageDataWithInstanceId("test"))
+                .willReturn(messageDTOList.asFlow())
+        }
+
+        wtc.get().uri ("/api/messageData/instanceId/test")
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList<MessageDataDTO>()
+            .contains(
+                messageDTOList[0], messageDTOList[1]
+            )
+    }
 }
