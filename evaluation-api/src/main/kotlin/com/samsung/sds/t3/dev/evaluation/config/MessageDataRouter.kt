@@ -105,12 +105,36 @@ class MessageDataRouter {
                     content = [Content(mediaType = "application/json", schema = Schema(implementation = MessageDataDTO::class))]
                 )]
             )
+        ),
+        RouterOperation(
+            method = arrayOf(RequestMethod.GET),
+            beanClass = MessageDataHandler::class,
+            beanMethod = "getMessageDataListByInstanceId",
+            path = "/api/messageData/instanceId/{instanceId}",
+            operation = Operation(
+                operationId = "getMessageDataListByInstanceId",
+                tags = ["MessageData"],
+                parameters = [
+                    Parameter(
+                        `in` = ParameterIn.PATH,
+                        name = "instanceId",
+                        description = "instance id like i-xxxxxxxxxxxxxxxxx",
+                        required = true
+                    )
+                ],
+                responses = [ApiResponse(
+                    responseCode = "200",
+                    description = "Success",
+                    content = [Content(mediaType = "application/json", schema = Schema(implementation = MessageDataDTO::class))]
+                )]
+            )
         )
     ))
     fun messageDataRoutes(messageDataHandler: MessageDataHandler) = coRouter {
         accept(MediaType.APPLICATION_JSON).nest {
             GET("/api/messageData/", messageDataHandler::getMessageDataList)
             GET("/api/messageData/slackUserName/{slackUserName}", messageDataHandler::getMessageDataListBySlackUserName)
+            GET("/api/messageData/instanceId/{instanceId}", messageDataHandler::getMessageDataListByInstanceId)
             GET("/api/messageData/{uuid}", messageDataHandler::getMessageDataByMessageUuid)
         }
     }

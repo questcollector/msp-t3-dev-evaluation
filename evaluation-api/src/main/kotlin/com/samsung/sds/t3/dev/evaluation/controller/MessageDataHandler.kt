@@ -57,6 +57,12 @@ class MessageDataHandler(
         return ServerResponse.ok().json().bodyAndAwait(result)
     }
 
+    @FlowPreview
+    suspend fun getMessageDataListByInstanceId(request: ServerRequest) : ServerResponse {
+        val instanceId = request.pathVariable("instanceId")
+        val result = messageDataQueryService.getMessageDataWithInstanceId(instanceId)
+        return ServerResponse.ok().json().bodyAndAwait(result)
+    }
 
 }
 

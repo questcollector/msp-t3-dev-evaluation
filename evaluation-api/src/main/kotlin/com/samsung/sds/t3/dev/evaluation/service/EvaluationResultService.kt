@@ -15,11 +15,11 @@ class EvaluationResultService (
 ) {
     private val log : Logger = LoggerFactory.getLogger(this.javaClass)
 
-    suspend fun getEvaluationResultBySlackUserName(
-        slackUserName: String,
+    suspend fun getEvaluationResultBySlackUserId(
+        slackUserId: String,
         startDateTime: LocalDateTime,
         endDateTime: LocalDateTime): EvaluationResultDTO {
-        val messages = messageDataRepository.findAllBySlackUserNameStartsWith(slackUserName)
+        val messages = messageDataRepository.findAllBySlackUserId(slackUserId)
 
         var result = true
         var reason: String? = "OK"
@@ -54,7 +54,10 @@ class EvaluationResultService (
                 reason = "통과한 메시지 없음"
             } else if (instanceId.count() > 1 || ipAddress.count() > 1) {
                 result = false
-                reason = "다른 VM에서 실행한 것으로 보임"
+                reason = "복수의 VM에서 실행한 것으로 보임"
+            } else if (isCheated(instanceId.first())) {
+                result = false
+                reason = "하나의 VM에서 여러 명이 실행한 것으로 보임"
             }
         }
 
@@ -65,5 +68,18 @@ class EvaluationResultService (
             reason,
             messageDTOs
         )
+    }
+
+    /**
+     * 하나의 인스턴스에서 여러 개의 슬랙 아이디로 메시지를 처리한 경우
+     */
+    suspend fun isCheated(instanceId : String) : Boolean {
+        val messages = messageDataRepository.findAllByInstanceId(instanceId)
+
+        val slackUserIds = messages.mapNotNull {
+            it.slackUserId
+        }.filterNotNull().toSet()
+
+        return slackUserIds.count() > 1
     }
 }

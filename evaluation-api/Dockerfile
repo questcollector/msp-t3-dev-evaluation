@@ -18,6 +18,12 @@ RUN $JAVA_HOME/bin/jlink \
 FROM --platform=linux/amd64 alpine:latest
 ENV JAVA_HOME=/jre
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
+ENV TZ=Asia/Seoul
+
+# set time zone
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
 # copy JRE from the base image
 COPY --from=corretto-jdk /customjre $JAVA_HOME

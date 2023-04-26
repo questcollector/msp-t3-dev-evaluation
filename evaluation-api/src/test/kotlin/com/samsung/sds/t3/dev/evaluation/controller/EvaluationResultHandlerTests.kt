@@ -31,8 +31,8 @@ class EvaluationResultHandlerTests {
     private lateinit var wtc: WebTestClient
 
     @Test
-    fun `slackusername 안보냈을 경우`() {
-        wtc.get().uri("/api/evaluation/slackUserName/")
+    fun `slackuserid 안보냈을 경우`() {
+        wtc.get().uri("/api/evaluation/slackUserId/")
             .exchange()
             .expectStatus().isNotFound
     }
@@ -41,13 +41,13 @@ class EvaluationResultHandlerTests {
     fun `startDate, endDate 안보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
         runBlocking {
-            given(evaluationResultService.getEvaluationResultBySlackUserName(
+            given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
         }
         wtc.get().uri {
-            it.path("/api/evaluation/slackUserName/")
-                .queryParam("slackUserName", TEST)
+            it.path("/api/evaluation/slackUserId/")
+                .queryParam("slackUserId", TEST)
                 .build()
         }
             .exchange()
@@ -61,14 +61,14 @@ class EvaluationResultHandlerTests {
     fun `이상한 startDate, endDate 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
         runBlocking {
-            given(evaluationResultService.getEvaluationResultBySlackUserName(
+            given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
         }
 
         wtc.get().uri {
-            it.path("/api/evaluation/slackUserName/")
-                .queryParam("slackUserName", TEST)
+            it.path("/api/evaluation/slackUserId/")
+                .queryParam("slackUserId", TEST)
                 .queryParam("startDate", "strange-string")
                 .queryParam("endDate", "strange-string")
                 .build()
@@ -88,14 +88,14 @@ class EvaluationResultHandlerTests {
         val endDateTime = LocalDateTime.parse(endDate)
         val result = EvaluationResultDTO(true, OK, emptyList())
         runBlocking {
-            given(evaluationResultService.getEvaluationResultBySlackUserName(
+            given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, startDateTime, endDateTime))
                 .willReturn(result)
         }
 
         wtc.get().uri {
-            it.path("/api/evaluation/slackUserName/")
-                .queryParam("slackUserName", TEST)
+            it.path("/api/evaluation/slackUserId/")
+                .queryParam("slackUserId", TEST)
                 .queryParam("startDate", startDate)
                 .queryParam("endDate", endDate)
                 .build()

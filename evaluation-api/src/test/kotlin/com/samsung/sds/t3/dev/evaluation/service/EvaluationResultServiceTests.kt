@@ -5,8 +5,7 @@ import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -30,12 +29,13 @@ class EvaluationResultServiceTests {
             emit(MessageDataEntity(sentDateTime = YESTERDAY.minusDays(1), isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
 
-        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
+        coEvery { messageDataRepository.findAllBySlackUserId(TEST) } returns entities
+        coEvery { messageDataRepository.findAllByInstanceId("instanceId") } returns entities
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
         runBlocking {
-            val result = evaluationResultService.getEvaluationResultBySlackUserName(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
+            val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", true)
                 .hasFieldOrPropertyWithValue("reason", "OK")
@@ -50,12 +50,13 @@ class EvaluationResultServiceTests {
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
 
-        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
+        coEvery { messageDataRepository.findAllBySlackUserId(TEST) } returns entities
+        coEvery { messageDataRepository.findAllByInstanceId("instanceId") } returns entities
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
         runBlocking {
-            val result = evaluationResultService.getEvaluationResultBySlackUserName(TEST, YESTERDAY, TODAY)
+            val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", true)
                 .hasFieldOrPropertyWithValue("reason", "OK")
@@ -69,12 +70,12 @@ class EvaluationResultServiceTests {
             emit(MessageDataEntity(sentDateTime = TODAY, instanceId = "instanceId", ipAddress = "ipaddress"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
-        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
+        coEvery { messageDataRepository.findAllBySlackUserId(TEST) } returns entities
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
         runBlocking {
-            val result = evaluationResultService.getEvaluationResultBySlackUserName(TEST, YESTERDAY, TODAY)
+            val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
                 .hasFieldOrPropertyWithValue("reason", "통과한 메시지 없음")
@@ -84,12 +85,12 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `데이터 없는 경우`() {
-        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns emptyFlow()
+        coEvery { messageDataRepository.findAllBySlackUserId(TEST) } returns emptyFlow()
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
         runBlocking {
-            val result = evaluationResultService.getEvaluationResultBySlackUserName(TEST, YESTERDAY, TODAY)
+            val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
                 .hasFieldOrPropertyWithValue("reason", "메시지 없음")
@@ -98,21 +99,21 @@ class EvaluationResultServiceTests {
     }
 
     @Test
-    fun `instanceId이 다른 경우`() {
+    fun `instanceId가 다른 경우`() {
         val entities = flow<MessageDataEntity> {
             emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId2", ipAddress = "ipaddress"))
         }
 
-        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
+        coEvery { messageDataRepository.findAllBySlackUserId(TEST) } returns entities
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
         runBlocking {
-            val result = evaluationResultService.getEvaluationResultBySlackUserName(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
+            val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
-                .hasFieldOrPropertyWithValue("reason", "다른 VM에서 실행한 것으로 보임")
+                .hasFieldOrPropertyWithValue("reason", "복수의 VM에서 실행한 것으로 보임")
             assertThat(result.data.size).isEqualTo(2)
         }
     }
@@ -124,16 +125,37 @@ class EvaluationResultServiceTests {
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress2"))
         }
 
-        coEvery { messageDataRepository.findAllBySlackUserNameStartsWith(TEST) } returns entities
+        coEvery { messageDataRepository.findAllBySlackUserId(TEST) } returns entities
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
         runBlocking {
-            val result = evaluationResultService.getEvaluationResultBySlackUserName(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
+            val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
-                .hasFieldOrPropertyWithValue("reason", "다른 VM에서 실행한 것으로 보임")
+                .hasFieldOrPropertyWithValue("reason", "복수의 VM에서 실행한 것으로 보임")
             assertThat(result.data.size).isEqualTo(2)
+        }
+    }
+
+    @Test
+    fun `하나의 인스턴스에서 여러 사람의 메시지가 보내진 경우`() {
+        val entities = flow<MessageDataEntity> {
+            emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "user1"))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "user2"))
+        }
+
+        coEvery { messageDataRepository.findAllBySlackUserId("user1") } returns flow { emit(entities.first()) }
+        coEvery { messageDataRepository.findAllByInstanceId("instanceId") } returns entities
+
+        val evaluationResultService = EvaluationResultService(messageDataRepository)
+
+        runBlocking {
+            val result = evaluationResultService.getEvaluationResultBySlackUserId("user1", LocalDateTime.MIN, LocalDateTime.MAX)
+            assertThat(result)
+                .hasFieldOrPropertyWithValue("result", false)
+                .hasFieldOrPropertyWithValue("reason", "하나의 VM에서 여러 명이 실행한 것으로 보임")
+            assertThat(result.data.size).isEqualTo(1)
         }
     }
 }
