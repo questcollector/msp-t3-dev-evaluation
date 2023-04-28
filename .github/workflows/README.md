@@ -2,7 +2,7 @@
 
 ## 주요 과정
 
-1. evaluation-api 또는 evaluation-event 내부의 파일이 변경되는 main branch의 push가 될 경우
+1. ~~evaluation-api 또는 evaluation-event 내부의 파일이 변경되는 main branch의 push가 될 경우~~
 2. evaluation-api 또는 evaluation-event 디렉토리에서 gradlew build 실행
 3. AWS ECR repository로 로그인 한 후 docker build-and-push 진행
 
