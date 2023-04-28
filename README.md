@@ -14,7 +14,7 @@ event: [`.github/workflows/event-ci.yml`](.github/workflows/event-ci.yml)
 
 msp-t3-evaluation-deploy 참조
 
-https://github.com/mspt2/msp-t3-dev-evaluation-deploy
+<https://github.com/mspt2/msp-t3-dev-evaluation-deploy>
 
 ## 로컬에서 실행
 
@@ -34,7 +34,7 @@ https://github.com/mspt2/msp-t3-dev-evaluation-deploy
 
 2. Rabbitmq config
    - JSON설정 파일을 rabbitmq management에서  
-     :link: http://localhost:15672  </br>
+     :link: <http://localhost:15672>  </br>
      Overview > Import definitions 에 업로드하여 Upload broker definitions 버튼을 클릭합니다.
      ![rabbitmq-management](img/rabbitmq-management.png)</br>
    - rabbitmq 설정 JSON 파일 문의 [miroirs01@gmail.com](mailto:miroirs01@gmail.com)
