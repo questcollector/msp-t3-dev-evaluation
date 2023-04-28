@@ -23,8 +23,8 @@ class EvaluationResultRouter {
         RouterOperation(
             method = arrayOf(RequestMethod.GET),
             beanClass = EvaluationResultHandler::class,
-            beanMethod = "getEvaluationResultBySlackUserName",
-            path = "/api/evaluation/slackUserName/",
+            beanMethod = "getEvaluationResultBySlackUserId",
+            path = "/api/evaluation/slackUserId/",
             operation = Operation(
                 operationId = "getEvaluationResultBySlackUserId",
                 tags = ["Evaluation"],
