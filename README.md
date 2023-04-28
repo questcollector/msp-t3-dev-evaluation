@@ -51,32 +51,3 @@ msp-t3-evaluation-deploy 참조
 ## 결과 파일 생성
 
 jupyter notebook: [`evaluation-script.ipynb`](evaluation-script.ipynb)
-
-## AWS 보안 설정
-
-1. Security group 생성 (1개당 60개 rule 입력 가능)
-
-2. 위에서 생성 한 Security group ID에 대해 수집 된 수강생 VM IP목록으로 다음의 JSON파일 작성(최대 60개)
-
-   ```json
-    {
-        "GroupId": "sg-037c0b4976b41baf2",
-        "IpPermissions": [
-            {
-                "IpProtocol": "tcp",
-                "FromPort": 5672,
-                "ToPort": 5672,
-                "IpRanges": [
-                    {"CidrIp": "121.133.133.0/24"},
-                    {"CidrIp": "221.167.219.0/24"}
-                ]
-            }
-        ]
-    }
-   ```
-
-3. AWS CLI에서 다음의 명령어 수행
-
-```shell
-aws ec2 authorize-security-group-ingress --cli-input-json file://./windows-vm-sg.json
-```
