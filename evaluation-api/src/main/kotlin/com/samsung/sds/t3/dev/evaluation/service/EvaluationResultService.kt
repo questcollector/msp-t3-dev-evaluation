@@ -76,9 +76,10 @@ class EvaluationResultService (
     suspend fun isCheated(instanceId : String) : Boolean {
         val messages = messageDataRepository.findAllByInstanceId(instanceId)
 
-        val slackUserIds = messages.mapNotNull {
-            it.slackUserId
-        }.filterNotNull().toSet()
+        val slackUserIds = messages
+            .filter { it.isPass }
+            .mapNotNull { it.slackUserId }
+            .filterNotNull().toSet()
 
         return slackUserIds.count() > 1
     }
