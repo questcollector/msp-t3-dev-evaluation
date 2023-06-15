@@ -50,4 +50,6 @@ msp-t3-evaluation-deploy 참조
 
 ## 결과 파일 생성
 
-jupyter notebook: [`evaluation-script.ipynb`](evaluation-script.ipynb)
+experimental: POST /api/evaluation/overall/
+
+slack에서 다운로드 받은 유저 정보 csv 파일을 입력하여 결과 파일 생성

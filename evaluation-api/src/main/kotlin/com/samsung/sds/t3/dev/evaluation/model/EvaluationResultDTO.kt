@@ -20,7 +20,7 @@ data class EvaluationResultDTO(
         required = false
     )
     @JsonProperty("reason")
-    val reason: String?,
+    val reason: String,
 
     @Schema(
         name = "data",

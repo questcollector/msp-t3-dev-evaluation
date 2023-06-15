@@ -1,13 +1,18 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
+import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
 import kotlinx.coroutines.flow.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Service
 class EvaluationResultService (
@@ -22,7 +27,7 @@ class EvaluationResultService (
         val messages = messageDataRepository.findAllBySlackUserId(slackUserId)
 
         var result = true
-        var reason: String? = "OK"
+        var reason = "OK"
 
         if (messages.count() == 0) {
             result = false
@@ -83,4 +88,53 @@ class EvaluationResultService (
 
         return slackUserIds.count() > 1
     }
+
+    suspend fun readCsv(inputStream: InputStream) : Flow<SlackMemberVO> {
+        val reader = inputStream.bufferedReader()
+        val header = reader.readLine()
+        return reader.lineSequence().asFlow()
+            .filter { it.isNotBlank() }
+            .map {
+                val columns = it.split(',', ignoreCase = false)
+                val (status, billingActive, userId, fullname, displayname) =
+                    arrayOf(columns[2], columns[3], columns[6], columns[7], columns[8])
+                SlackMemberVO(
+                    status.trim(),
+                    billingActive.toInt(),
+                    userId.trim(),
+                    fullname.trim().removeSurrounding("\""),
+                    displayname.trim().removeSurrounding("\"")
+                )
+            }.filter {
+                (it.status == "Member" && it.billingActive == 1)
+            }.catch {
+                log.info(it.toString())
+            }
+    }
+    suspend fun getResults(
+        slackMembers: Flow<SlackMemberVO>,
+        startDateTime: LocalDateTime,
+        endDateTime: LocalDateTime) : Flow<SlackMemberVO> {
+        return slackMembers.map {
+            val result = getEvaluationResultBySlackUserId(it.userId, startDateTime, endDateTime)
+            it.result = result.reason
+            if (log.isDebugEnabled) {
+                log.debug("${it.userId}: ${it.result}")
+            }
+            it
+        }
+    }
+
+}
+suspend fun OutputStream.writeCsv(slackMembers: Flow<SlackMemberVO>) {
+    val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+    val writer = bufferedWriter()
+    writer.write("""userid, fullname, displayname, result_${now}""")
+    writer.newLine()
+    slackMembers.onCompletion {
+        writer.flush()
+    }.map {
+        writer.write("${it.userId}, \"${it.fullname}\", \"${it.displayname}\", ${it.result}")
+        writer.newLine()
+    }.collect()
 }
