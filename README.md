@@ -53,3 +53,19 @@ msp-t3-evaluation-deploy 참조
 experimental: POST /api/evaluation/overall/
 
 slack에서 다운로드 받은 유저 정보 csv 파일을 입력하여 결과 파일 생성
+
+![manage members.png](img/manage members.png)
+
+![export csv.png](img/export csv.png)
+
+![download csv.png](img/download csv.png)
+
+csv 구조
+
+| username  | email               | status | billing-active | has-2fa | has-sso | userid      | fullname     | displayname  | expiration-timestamp |
+|-----------|---------------------|--------|----------------|---------|---------|-------------|--------------|--------------|----------------------|
+| miroirs01 | miroirs01@gmail.com | Admin  | 1              | 1       | 0       | U059H0Z4PH6 | "실습보조강사 유기영" | "실습보조강사 유기영" |                      |
+
+![api request.png](img/api request.png)
+
+![download result.png](img/download result.png)
