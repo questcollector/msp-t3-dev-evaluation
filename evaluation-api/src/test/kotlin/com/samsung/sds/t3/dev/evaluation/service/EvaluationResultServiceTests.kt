@@ -158,4 +158,20 @@ class EvaluationResultServiceTests {
             assertThat(result.data.size).isEqualTo(1)
         }
     }
+
+    @Test
+    fun `slack id 잘못 입력했을 경우 isCheated 값은 false`() {
+        val entities = flow<MessageDataEntity> {
+            emit(MessageDataEntity(sentDateTime = TODAY, isPass = false, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "<<user>>"))
+            emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "user"))
+        }
+        coEvery { messageDataRepository.findAllByInstanceId("instanceId") } returns entities
+
+        val evaluationResultService = EvaluationResultService(messageDataRepository)
+
+        runBlocking {
+            val result = evaluationResultService.isCheated("instanceId")
+            assertThat(result).isEqualTo(false)
+        }
+    }
 }
