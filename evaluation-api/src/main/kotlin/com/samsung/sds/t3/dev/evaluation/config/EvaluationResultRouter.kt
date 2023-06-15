@@ -28,7 +28,6 @@ class EvaluationResultRouter {
             path = "/api/evaluation/slackUserId/",
             operation = Operation(
                 operationId = "getEvaluationResultBySlackUserId",
-                description = "experimental",
                 tags = ["Evaluation"],
                 parameters = [
                     Parameter(
@@ -66,6 +65,7 @@ class EvaluationResultRouter {
             path = "/api/evaluation/overall/",
             operation = Operation(
                 operationId = "getEvaluationResultAsFile",
+                description = "experimental",
                 tags = ["Evaluation"],
                 parameters = [
                     Parameter(
