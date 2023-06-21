@@ -3,23 +3,15 @@ package com.samsung.sds.t3.dev.evaluation.controller
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import com.samsung.sds.t3.dev.evaluation.service.writeCsv
 import io.swagger.v3.oas.annotations.tags.Tag
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.reactor.flux
-import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.*
-import reactor.kotlin.core.publisher.toMono
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.nio.ByteBuffer
+import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
@@ -42,8 +34,8 @@ class EvaluationResultHandler(
 
         slackUserId ?: return ServerResponse.notFound().buildAndAwait()
 
-        val startDateTime = parseLocalDateTime(startDate, LocalDateTime.MIN)
-        val endDateTime = parseLocalDateTime(endDate, LocalDateTime.MAX)
+        val startDateTime = startDate.parseLocalDateTimeWithDefaultValue(LocalDateTime.MIN)
+        val endDateTime = endDate.parseLocalDateTimeWithDefaultValue(LocalDateTime.MAX)
 
         val result = evaluationResultService.getEvaluationResultBySlackUserId(slackUserId, startDateTime, endDateTime)
         return ServerResponse.ok().json().bodyValueAndAwait(result)
@@ -53,41 +45,43 @@ class EvaluationResultHandler(
         val startDate = request.queryParamOrNull("startDate")
         val endDate = request.queryParamOrNull("endDate")
 
-        val startDateTime = parseLocalDateTime(startDate, LocalDateTime.MIN)
-        val endDateTime = parseLocalDateTime(endDate, LocalDateTime.MAX)
+        val startDateTime = startDate.parseLocalDateTimeWithDefaultValue(LocalDateTime.MIN)
+        val endDateTime = endDate.parseLocalDateTimeWithDefaultValue(LocalDateTime.MAX)
 
         val fileBytes = request.bodyToFlow(ByteArray::class)
-        val dataFrame = fileBytes.reduce { accumulator, value ->
-            accumulator + value
+
+        val slackMembers = evaluationResultService.readCsv(fileBytes)
+        val results = evaluationResultService.getResults(slackMembers, startDateTime, endDateTime)
+
+        val outputFile = File("result.csv")
+        if (outputFile.exists()) {
+            outputFile.delete()
         }
+        val outputStream = FileOutputStream(outputFile).use { it.writeCsv(results) }
 
-        val slackMemebers = evaluationResultService.readCsv(ByteArrayInputStream(dataFrame))
-        val results = evaluationResultService.getResults(slackMemebers, startDateTime, endDateTime)
-
-        val output = ByteArrayOutputStream().apply { writeCsv(results) }.toByteArray()
-        val resource = ByteArrayResource(output)
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         return ServerResponse.ok()
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .contentLength(resource.contentLength())
+            .contentLength(outputFile.length())
             .header(
                 HttpHeaders.CONTENT_DISPOSITION,
                 ContentDisposition.attachment()
                     .filename("result_${now}.csv")
                     .build().toString())
-            .bodyValueAndAwait(resource)
+            .bodyValueAndAwait(outputFile.readBytes())
     }
 
-    private fun parseLocalDateTime(datetime: String?, default: LocalDateTime): LocalDateTime {
-        var result = default
-        datetime?.run {
-            try {
-                result = LocalDateTime.parse(datetime)
-            } catch (e : DateTimeParseException) {
-                log.info("datetime parse error: ${datetime}")
-            }
+}
+
+fun String?.parseLocalDateTimeWithDefaultValue(default: LocalDateTime): LocalDateTime {
+    var result = default
+    this?.run {
+        try {
+            result = LocalDateTime.parse(this)
+        } catch (e : DateTimeParseException) {
+            println("datetime parse error: ${this}")
         }
-        return result
     }
+    return result
 }

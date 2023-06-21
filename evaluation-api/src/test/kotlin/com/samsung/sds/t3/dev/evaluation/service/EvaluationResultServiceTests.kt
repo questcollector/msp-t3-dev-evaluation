@@ -1,10 +1,12 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
+import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -172,6 +174,30 @@ class EvaluationResultServiceTests {
         runBlocking {
             val result = evaluationResultService.isCheated("instanceId")
             assertThat(result).isEqualTo(false)
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    @Test
+    fun `csv ByteArray를 SlackMemberVO로 변환`() {
+        val csv = flow<ByteArray> {
+            emit("username,email,status,billing-active,has-2fa,has-sso,userid,fullname,displayname,expiration-timestamp\n".toByteArray())
+            emit("miroirs01,miroirs01@gmail.com,Member,1,1,0,U059H0Z4PH6,\"실습보조강사 유기영\"".toByteArray())
+            emit(",\"실습보조강사 유기영\",\n".toByteArray())
+        }
+        val slackMember = SlackMemberVO(
+            "Member",
+            1,
+            "U059H0Z4PH6",
+            "실습보조강사 유기영",
+            "실습보조강사 유기영"
+        )
+
+        val evaluationResultService = EvaluationResultService(messageDataRepository)
+
+        runBlocking {
+            val slackMembers = evaluationResultService.readCsv(csv)
+            assertThat(slackMembers.first()).isEqualTo(slackMember)
         }
     }
 }

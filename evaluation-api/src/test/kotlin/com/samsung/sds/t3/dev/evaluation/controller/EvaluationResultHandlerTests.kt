@@ -2,17 +2,23 @@ package com.samsung.sds.t3.dev.evaluation.controller
 
 import com.samsung.sds.t3.dev.evaluation.config.EvaluationResultRouter
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
+import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.*
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
+import reactor.core.publisher.Flux
 import java.time.LocalDateTime
 
 private const val OK = "OK"
@@ -105,5 +111,51 @@ class EvaluationResultHandlerTests {
             .expectBody()
             .jsonPath("$.result").isEqualTo(true)
             .jsonPath("$.reason").isEqualTo(OK)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> any(): T {
+        Mockito.any<T>()
+        return null as T
+    }
+    @Test
+    fun `평가 결과 파일 요청`() {
+        val fileContent = "example.file.data".toByteArray()
+        val fileName = "sample"
+
+        val flowContent = arrayListOf(
+            SlackMemberVO("Member", 1, "userid1", "name1", "name1", "OK"),
+            SlackMemberVO("Member", 1, "userid2", "name2", "name2", "OK"),
+            SlackMemberVO("Member", 1, "userid3", "name3", "name3", "OK")
+        )
+        val slackMembers = flowContent.asFlow()
+
+        runBlocking {
+            given(evaluationResultService.readCsv(any()))
+                .willReturn(slackMembers)
+            given(evaluationResultService.getResults(slackMembers, LocalDateTime.MIN, LocalDateTime.MAX))
+                .willReturn(slackMembers)
+        }
+
+        wtc.post().uri {
+            it.path("/api/evaluation/overall/")
+                .build()
+        }
+            .contentLength(fileContent.size.toLong())
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\"")
+            .body(Flux.just(fileContent), ByteArray::class.java)
+            .exchange()
+
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .expectHeader().valueMatches(
+                HttpHeaders.CONTENT_DISPOSITION,
+                """attachment; filename="result_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.csv""""
+            )
+            .expectBody().consumeWith { response ->
+                val responseBody = String(response.responseBody!!)
+                println(responseBody)
+            }
     }
 }

@@ -4,12 +4,11 @@ import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.io.OutputStream
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -89,12 +88,59 @@ class EvaluationResultService (
         return slackUserIds.count() > 1
     }
 
-    suspend fun readCsv(inputStream: InputStream) : Flow<SlackMemberVO> {
-        val reader = inputStream.bufferedReader()
-        val header = reader.readLine()
-        return reader.lineSequence().asFlow()
-            .filter { it.isNotBlank() }
-            .map {
+    @FlowPreview
+    suspend fun readCsv(data: Flow<ByteArray>) : Flow<SlackMemberVO> {
+        // line이 잘렸을 때 앞 부분을 임시로 저장하는 변수
+        var remainingBytes : ByteArray? = null
+
+        return data
+            .buffer()
+            // ByteArray -> String(line)
+            .flatMapConcat { data ->
+                val lines = mutableListOf<String>()
+                var currentLine = StringBuilder()
+
+                // 줄이 잘렸을 경우 잘린 앞부분을 저장한 배열과 합함
+                val combinedData = if (remainingBytes != null) {
+                    remainingBytes!! + data
+                } else {
+                    data
+                }
+
+                val rawData = combinedData.toString(Charsets.UTF_8)
+                // 라인 분리
+                for (char in rawData) {
+                    when (char) {
+                        '\n' -> {
+                            if (log.isDebugEnabled) {
+                                log.debug("currentLine: ${currentLine.toString()}")
+                            }
+                            lines.add(currentLine.toString())
+                            currentLine.clear()
+                        }
+                        '\r' -> {
+                            // nothing, ignore carriage return
+                        }
+                        else -> currentLine.append(char)
+                    }
+                }
+
+                // 줄이 잘린 경우 현재 라인을 배열에 저장
+                remainingBytes = if (currentLine.isNotEmpty()) {
+                    currentLine.toString().toByteArray(Charsets.UTF_8)
+                } else {
+                    null
+                }
+
+                if (log.isDebugEnabled) {
+                    log.debug("remainingBytes: ${remainingBytes.toString()}")
+                }
+
+                lines.asFlow()
+            }.buffer().filter {
+                // 헤더 부분 제외
+               !(it.startsWith("username,"))
+            }.map {
                 val columns = it.split(',', ignoreCase = false)
                 val (status, billingActive, userId, fullname, displayname) =
                     arrayOf(columns[2], columns[3], columns[6], columns[7], columns[8])
@@ -115,8 +161,9 @@ class EvaluationResultService (
         slackMembers: Flow<SlackMemberVO>,
         startDateTime: LocalDateTime,
         endDateTime: LocalDateTime) : Flow<SlackMemberVO> {
+
         return slackMembers.map {
-            val result = getEvaluationResultBySlackUserId(it.userId, startDateTime, endDateTime)
+            val result = this.getEvaluationResultBySlackUserId(it.userId, startDateTime, endDateTime)
             it.result = result.reason
             if (log.isDebugEnabled) {
                 log.debug("${it.userId}: ${it.result}")
@@ -124,17 +171,22 @@ class EvaluationResultService (
             it
         }
     }
-
 }
 suspend fun OutputStream.writeCsv(slackMembers: Flow<SlackMemberVO>) {
     val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
     val writer = bufferedWriter()
-    writer.write("""userid, fullname, displayname, result_${now}""")
-    writer.newLine()
-    slackMembers.onCompletion {
-        writer.flush()
-    }.map {
-        writer.write("${it.userId}, \"${it.fullname}\", \"${it.displayname}\", ${it.result}")
+
+    writer.use {
+        val headers = "userid,fullname,displayname,result_${now}"
+
+        writer.write(headers)
         writer.newLine()
-    }.collect()
+
+        slackMembers.onCompletion { writer.flush() }
+            .collect {
+                val value = "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}"
+                writer.write(value)
+                writer.newLine()
+            }
+    }
 }
