@@ -171,22 +171,17 @@ class EvaluationResultService (
             it
         }
     }
-}
-suspend fun OutputStream.writeCsv(slackMembers: Flow<SlackMemberVO>) {
-    val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
-    val writer = bufferedWriter()
 
-    writer.use {
-        val headers = "userid,fullname,displayname,result_${now}"
+    suspend fun writeCsv(slackMembers: Flow<SlackMemberVO>) = flow<ByteArray> {
+        // header
+        val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        emit("userid,fullname,displayname,result_${now}\n".toByteArray())
 
-        writer.write(headers)
-        writer.newLine()
-
-        slackMembers.onCompletion { writer.flush() }
-            .collect {
-                val value = "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}"
-                writer.write(value)
-                writer.newLine()
+        // data
+        emitAll(
+            slackMembers.map {
+                "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray()
             }
+        )
     }
 }

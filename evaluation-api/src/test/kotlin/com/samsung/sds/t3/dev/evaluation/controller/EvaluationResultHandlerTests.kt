@@ -6,6 +6,7 @@ import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
@@ -20,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 import reactor.core.publisher.Flux
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 private const val OK = "OK"
 
@@ -113,6 +115,7 @@ class EvaluationResultHandlerTests {
             .jsonPath("$.reason").isEqualTo(OK)
     }
 
+    // 사용자 정의 Mockito.any()
     @Suppress("UNCHECKED_CAST")
     private fun <T> any(): T {
         Mockito.any<T>()
@@ -120,21 +123,37 @@ class EvaluationResultHandlerTests {
     }
     @Test
     fun `평가 결과 파일 요청`() {
+
+        // sample request body
         val fileContent = "example.file.data".toByteArray()
         val fileName = "sample"
 
-        val flowContent = arrayListOf(
+        // 중간 결과물 Flow<SlackMemeberVO>
+        val slackMembers = arrayListOf(
             SlackMemberVO("Member", 1, "userid1", "name1", "name1", "OK"),
             SlackMemberVO("Member", 1, "userid2", "name2", "name2", "OK"),
             SlackMemberVO("Member", 1, "userid3", "name3", "name3", "OK")
-        )
-        val slackMembers = flowContent.asFlow()
+        ).asFlow()
 
+        val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+
+        // 최종 csv 형태의 Flow<ByteArray>
+        val csv = flow<ByteArray> {
+            emit("userid,fullname,displayname,result_${now}\n".toByteArray())
+            emitAll(slackMembers.map {
+                "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray()
+            })
+        }
+
+        // Mocking
         runBlocking {
             given(evaluationResultService.readCsv(any()))
                 .willReturn(slackMembers)
             given(evaluationResultService.getResults(slackMembers, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(slackMembers)
+            given(evaluationResultService.writeCsv(slackMembers))
+                .willReturn(csv)
+
         }
 
         wtc.post().uri {
