@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.io.OutputStream
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -96,15 +95,15 @@ class EvaluationResultService (
         return data
             .buffer()
             // ByteArray -> String(line)
-            .flatMapConcat { data ->
+            .flatMapConcat { bytes ->
                 val lines = mutableListOf<String>()
-                var currentLine = StringBuilder()
+                val currentLine = StringBuilder()
 
                 // 줄이 잘렸을 경우 잘린 앞부분을 저장한 배열과 합함
                 val combinedData = if (remainingBytes != null) {
-                    remainingBytes!! + data
+                    remainingBytes!! + bytes
                 } else {
-                    data
+                    bytes
                 }
 
                 val rawData = combinedData.toString(Charsets.UTF_8)
@@ -171,22 +170,17 @@ class EvaluationResultService (
             it
         }
     }
-}
-suspend fun OutputStream.writeCsv(slackMembers: Flow<SlackMemberVO>) {
-    val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
-    val writer = bufferedWriter()
 
-    writer.use {
-        val headers = "userid,fullname,displayname,result_${now}"
+    suspend fun writeCsv(slackMembers: Flow<SlackMemberVO>) = flow<ByteArray> {
+        // header
+        val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        emit("userid,fullname,displayname,result_${now}\n".toByteArray())
 
-        writer.write(headers)
-        writer.newLine()
-
-        slackMembers.onCompletion { writer.flush() }
-            .collect {
-                val value = "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}"
-                writer.write(value)
-                writer.newLine()
+        // data
+        emitAll(
+            slackMembers.map {
+                "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray()
             }
+        )
     }
 }

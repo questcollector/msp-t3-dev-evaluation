@@ -1,8 +1,8 @@
 package com.samsung.sds.t3.dev.evaluation.controller
 
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
-import com.samsung.sds.t3.dev.evaluation.service.writeCsv
 import io.swagger.v3.oas.annotations.tags.Tag
+import kotlinx.coroutines.FlowPreview
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ContentDisposition
@@ -10,8 +10,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.*
-import java.io.File
-import java.io.FileOutputStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
@@ -41,35 +39,36 @@ class EvaluationResultHandler(
         return ServerResponse.ok().json().bodyValueAndAwait(result)
     }
 
+    @FlowPreview
     suspend fun getEvaluationResultAsFile(request: ServerRequest) : ServerResponse {
+
+        // parameter 변환
         val startDate = request.queryParamOrNull("startDate")
         val endDate = request.queryParamOrNull("endDate")
 
         val startDateTime = startDate.parseLocalDateTimeWithDefaultValue(LocalDateTime.MIN)
         val endDateTime = endDate.parseLocalDateTimeWithDefaultValue(LocalDateTime.MAX)
 
+        // file content Flow<ByteArray>로 변환
         val fileBytes = request.bodyToFlow(ByteArray::class)
 
+        // SlackMemberVO 변환, 결과 처리
         val slackMembers = evaluationResultService.readCsv(fileBytes)
         val results = evaluationResultService.getResults(slackMembers, startDateTime, endDateTime)
 
-        val outputFile = File("result.csv")
-        if (outputFile.exists()) {
-            outputFile.delete()
-        }
-        val outputStream = FileOutputStream(outputFile).use { it.writeCsv(results) }
+        // CSV 형태로 Flow<ByteArray> 생성
+        val outputCsv = evaluationResultService.writeCsv(results)
 
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         return ServerResponse.ok()
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .contentLength(outputFile.length())
             .header(
                 HttpHeaders.CONTENT_DISPOSITION,
                 ContentDisposition.attachment()
                     .filename("result_${now}.csv")
                     .build().toString())
-            .bodyValueAndAwait(outputFile.readBytes())
+            .bodyAndAwait(outputCsv)
     }
 
 }
