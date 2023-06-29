@@ -7,7 +7,6 @@ import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
