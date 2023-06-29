@@ -4,6 +4,7 @@ import com.samsung.sds.t3.dev.evaluation.config.EvaluationResultRouter
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
@@ -122,6 +123,7 @@ class EvaluationResultHandlerTests {
         return null as T
     }
     @Test
+    @FlowPreview
     fun `평가 결과 파일 요청`() {
 
         // sample request body

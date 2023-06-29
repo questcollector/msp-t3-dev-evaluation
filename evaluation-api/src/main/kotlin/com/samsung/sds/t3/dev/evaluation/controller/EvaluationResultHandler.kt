@@ -2,6 +2,7 @@ package com.samsung.sds.t3.dev.evaluation.controller
 
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import io.swagger.v3.oas.annotations.tags.Tag
+import kotlinx.coroutines.FlowPreview
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ContentDisposition
@@ -38,6 +39,7 @@ class EvaluationResultHandler(
         return ServerResponse.ok().json().bodyValueAndAwait(result)
     }
 
+    @FlowPreview
     suspend fun getEvaluationResultAsFile(request: ServerRequest) : ServerResponse {
 
         // parameter 변환
