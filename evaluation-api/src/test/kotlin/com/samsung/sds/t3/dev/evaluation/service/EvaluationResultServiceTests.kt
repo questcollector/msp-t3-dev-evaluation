@@ -1,11 +1,13 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
+import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
@@ -198,6 +200,53 @@ class EvaluationResultServiceTests {
         runBlocking {
             val slackMembers = evaluationResultService.readCsv(csv)
             assertThat(slackMembers.first()).isEqualTo(slackMember)
+        }
+    }
+
+    @Test
+    fun `SlackMemberVO에서 결과 조회하기`() {
+        val slackMember = SlackMemberVO(
+            "Member",
+            1,
+            "U059H0Z4PH6",
+            "실습보조강사 유기영",
+            "실습보조강사 유기영"
+        )
+
+        val evaluationResultService = spyk(EvaluationResultService(messageDataRepository))
+
+        coEvery {
+            evaluationResultService.getEvaluationResultBySlackUserId("U059H0Z4PH6", LocalDateTime.MIN, LocalDateTime.MAX)
+        } returns EvaluationResultDTO(true, "OK", emptyList())
+
+        runBlocking {
+            val slackMembers = evaluationResultService.getResults(flowOf(slackMember), LocalDateTime.MIN, LocalDateTime.MAX)
+            assertThat(slackMembers.first().result).isEqualTo("OK")
+        }
+    }
+
+    @Test
+    fun `csv 파일 쓰기`() {
+        val slackMember = SlackMemberVO(
+            "Member",
+            1,
+            "U059H0Z4PH6",
+            "실습보조강사 유기영",
+            "실습보조강사 유기영",
+            "OK"
+        )
+
+        val evaluationResultService = EvaluationResultService(messageDataRepository)
+
+        val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}".toRegex()
+        val csvRow = "${slackMember.userId},\"${slackMember.fullname}\",\"${slackMember.displayname}\",${slackMember.result}"
+
+        runBlocking {
+            val bytes = evaluationResultService.writeCsv(flowOf(slackMember))
+                .reduce { accumulator, value ->  accumulator + value}
+            val content = String(bytes, Charsets.UTF_8).split("\n")
+            assertThat(content[0].matches(csvHeader)).isEqualTo(true)
+            assertThat(content[1]).isEqualTo(csvRow)
         }
     }
 }
