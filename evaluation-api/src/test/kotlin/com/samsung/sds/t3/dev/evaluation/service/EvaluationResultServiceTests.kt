@@ -239,7 +239,6 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}".toRegex()
         val csvRow = "${slackMember.userId},\"${slackMember.fullname}\",\"${slackMember.displayname}\",${slackMember.result}"
 
