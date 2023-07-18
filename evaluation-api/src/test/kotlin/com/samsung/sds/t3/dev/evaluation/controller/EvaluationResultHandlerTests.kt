@@ -162,13 +162,13 @@ class EvaluationResultHandlerTests {
                 .build()
         }
             .contentLength(fileContent.size.toLong())
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentType(MediaType.parseMediaType("text/csv"))
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\"")
             .body(Flux.just(fileContent), ByteArray::class.java)
             .exchange()
 
             .expectStatus().isOk
-            .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .expectHeader().contentType(MediaType.parseMediaType("text/csv"))
             .expectHeader().valueMatches(
                 HttpHeaders.CONTENT_DISPOSITION,
                 """attachment; filename="result_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.csv""""
