@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import kotlinx.coroutines.FlowPreview
 import org.springdoc.core.annotations.RouterOperation
 import org.springdoc.core.annotations.RouterOperations
 import org.springframework.context.annotation.Bean
@@ -19,6 +20,7 @@ import org.springframework.web.reactive.function.server.coRouter
 
 @Configuration
 class EvaluationResultRouter {
+    @OptIn(FlowPreview::class)
     @Bean
     @RouterOperations(*arrayOf(
         RouterOperation(
@@ -83,7 +85,7 @@ class EvaluationResultRouter {
                 ],
                 requestBody = RequestBody(
                     description = "수강생 명단 목록 csv 파일",
-                    content = [Content(mediaType = "application/octet-stream",
+                    content = [Content(mediaType = "text/csv",
                         schema = Schema(type = "string", format = "binary"))],
                     required = true
                 ),
@@ -91,7 +93,7 @@ class EvaluationResultRouter {
                     ApiResponse(
                         responseCode = "200",
                         description = "Success",
-                        content = [Content(mediaType = "application/octet-stream",
+                        content = [Content(mediaType = "text/csv",
                             schema = Schema(type = "string", format = "binary"))]
                     )
                 ]
@@ -102,7 +104,7 @@ class EvaluationResultRouter {
         accept(MediaType.APPLICATION_JSON).nest {
             GET("/api/evaluation/slackUserId/", evaluationResultHandler::getEvaluationResultBySlackUserId)
         }
-        accept(MediaType.APPLICATION_OCTET_STREAM).nest {
+        accept(MediaType.parseMediaType("text/csv")).nest {
             POST("/api/evaluation/overall/", evaluationResultHandler::getEvaluationResultAsFile)
         }
     }

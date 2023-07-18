@@ -62,7 +62,7 @@ class EvaluationResultHandler(
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         return ServerResponse.ok()
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentType(MediaType.parseMediaType("text/csv"))
             .header(
                 HttpHeaders.CONTENT_DISPOSITION,
                 ContentDisposition.attachment()
