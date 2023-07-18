@@ -83,7 +83,7 @@ class EvaluationResultRouter {
                 ],
                 requestBody = RequestBody(
                     description = "수강생 명단 목록 csv 파일",
-                    content = [Content(mediaType = "application/octet-stream",
+                    content = [Content(mediaType = "text/csv",
                         schema = Schema(type = "string", format = "binary"))],
                     required = true
                 ),
@@ -91,7 +91,7 @@ class EvaluationResultRouter {
                     ApiResponse(
                         responseCode = "200",
                         description = "Success",
-                        content = [Content(mediaType = "application/octet-stream",
+                        content = [Content(mediaType = "text/csv",
                             schema = Schema(type = "string", format = "binary"))]
                     )
                 ]
@@ -102,7 +102,7 @@ class EvaluationResultRouter {
         accept(MediaType.APPLICATION_JSON).nest {
             GET("/api/evaluation/slackUserId/", evaluationResultHandler::getEvaluationResultBySlackUserId)
         }
-        accept(MediaType.APPLICATION_OCTET_STREAM).nest {
+        accept(MediaType.parseMediaType("text/csv")).nest {
             POST("/api/evaluation/overall/", evaluationResultHandler::getEvaluationResultAsFile)
         }
     }

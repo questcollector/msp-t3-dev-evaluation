@@ -9,6 +9,7 @@ import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.util.MimeType
 import org.springframework.web.reactive.function.server.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
@@ -62,7 +63,7 @@ class EvaluationResultHandler(
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         return ServerResponse.ok()
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentType(MediaType.parseMediaType("text/csv"))
             .header(
                 HttpHeaders.CONTENT_DISPOSITION,
                 ContentDisposition.attachment()
