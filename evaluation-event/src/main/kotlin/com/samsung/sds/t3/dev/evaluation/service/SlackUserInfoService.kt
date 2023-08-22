@@ -29,7 +29,7 @@ class SlackUserInfoService (
         )
 
         return suspendCoroutine {
-            response.whenComplete { t, u ->
+            response.whenComplete { t, _ ->
                 if (t.isOk) {
                     log.info("Success getSlackUserNameWithSlackUserId")
                     if (log.isDebugEnabled) log.debug("$t")

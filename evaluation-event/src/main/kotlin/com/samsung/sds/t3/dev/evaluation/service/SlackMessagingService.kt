@@ -63,7 +63,7 @@ class SlackMessagingService (
                 .build()
         )
         return suspendCoroutine {
-            response.whenComplete { t, u ->
+            response.whenComplete { t, _ ->
                 if (t.isOk) {
                     it.resume(t)
                 } else {
