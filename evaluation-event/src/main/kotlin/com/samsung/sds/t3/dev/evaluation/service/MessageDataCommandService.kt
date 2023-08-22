@@ -34,8 +34,8 @@ class MessageDataCommandService (
         val isPass: Boolean = calculateIsPass(headers, slackUserName)
 
         val sentDateTime: LocalDateTime? = headers.timestamp?.run {
-            val epochSecond = this / 1000
-            val nano = this % 1000 * 1000000
+            val epochSecond = this / 1_000
+            val nano = this % 1_000 * 1_000_000
             LocalDateTime.ofEpochSecond(
                 epochSecond,
                 nano.toInt(),
