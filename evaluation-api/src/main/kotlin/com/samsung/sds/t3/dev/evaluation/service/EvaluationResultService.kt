@@ -1,9 +1,11 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
+import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import org.slf4j.Logger
@@ -13,19 +15,17 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 @Service
-class EvaluationResultService (
+class EvaluationResultService(
     private val messageDataRepository: MessageDataRepository
 ) {
-    private val log : Logger = LoggerFactory.getLogger(this.javaClass)
+    private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
     suspend fun getEvaluationResultBySlackUserId(
         slackUserId: String,
         startDateTime: LocalDateTime,
-        endDateTime: LocalDateTime): EvaluationResultDTO {
+        endDateTime: LocalDateTime
+    ): EvaluationResultDTO {
         val messages = messageDataRepository.findAllBySlackUserId(slackUserId)
-
-        var result = true
-        var reason = "OK"
 
         if (messages.count() == 0) {
             return EvaluationResultDTO(
@@ -76,7 +76,7 @@ class EvaluationResultService (
     /**
      * 하나의 인스턴스에서 여러 개의 슬랙 아이디로 메시지를 처리한 경우
      */
-    suspend fun isCheated(instanceId : String) : Boolean {
+    suspend fun isCheated(instanceId: String): Boolean {
         val messages = messageDataRepository.findAllByInstanceId(instanceId)
 
         val slackUserIds = messages
@@ -88,51 +88,55 @@ class EvaluationResultService (
     }
 
     @FlowPreview
-    suspend fun readCsv(data: Flow<ByteArray>) : Flow<SlackMemberVO> {
+    fun readCsv(data: Flow<ByteArray>): Flow<SlackMemberVO> {
         // line이 잘렸을 때 앞 부분을 임시로 저장하는 변수
-        var remainingBytes : ByteArray? = null
+        var remainingBytes: ByteArray? = null
 
-        return data
+        return data.flowOn(Dispatchers.IO)
             // ByteArray -> String(line)
-            .flatMapConcat { bytes -> flow<String> {
-                val currentThread = Thread.currentThread()
-                if (log.isDebugEnabled) log.debug("ByteArray -> String(line) Thread name: ${currentThread.name}")
-                val line = StringBuilder()
+            .flatMapConcat { bytes ->
+                flow<String> {
+                    val currentThread = Thread.currentThread()
+                    if (log.isDebugEnabled) log.debug("ByteArray -> String(line) Thread name: ${currentThread.name}")
+                    val line = StringBuilder()
 
-                // 줄이 잘렸을 경우 잘린 앞부분을 저장한 배열과 합함
-                val combinedData = if (remainingBytes != null) {
-                    remainingBytes!! + bytes
-                } else {
-                    bytes
-                }
+                    // 줄이 잘렸을 경우 잘린 앞부분을 저장한 배열과 합함
+                    val combinedData = if (remainingBytes != null) {
+                        remainingBytes!! + bytes
+                    } else {
+                        bytes
+                    }
 
-                val rawData = combinedData.toString(Charsets.UTF_8)
-                // 라인 분리
-                for (char in rawData) {
-                    when (char) {
-                        '\n' -> {
-                            if (log.isDebugEnabled) log.debug("currentLine: ${line.toString()}")
-                            // 데이터 완결 시 바로 publish
-                            emit(line.toString())
-                            line.clear()
+                    val rawData = combinedData.toString(Charsets.UTF_8)
+                    // 라인 분리
+                    for (char in rawData) {
+                        when (char) {
+                            '\n' -> {
+                                if (log.isDebugEnabled) log.debug("currentLine: ${line.toString()}")
+                                // 데이터 완결 시 바로 publish
+                                emit(line.toString())
+                                line.clear()
+                            }
+
+                            '\r' -> {
+                                // nothing, ignore carriage return
+                            }
+
+                            else -> line.append(char)
                         }
-                        '\r' -> {
-                            // nothing, ignore carriage return
-                        }
-                        else -> line.append(char)
+                    }
+
+                    // 줄이 잘린 경우 현재 라인을 배열에 저장
+                    remainingBytes = if (line.isNotEmpty()) {
+                        if (log.isDebugEnabled) log.debug("remainingBytes: $line")
+                        line.toString().toByteArray(Charsets.UTF_8)
+                    } else {
+                        null
                     }
                 }
-
-                // 줄이 잘린 경우 현재 라인을 배열에 저장
-                remainingBytes = if (line.isNotEmpty()) {
-                    if (log.isDebugEnabled) log.debug("remainingBytes: $line")
-                    line.toString().toByteArray(Charsets.UTF_8)
-                } else {
-                    null
-                }
-            }}.buffer().filter {
+            }.buffer().filter {
                 // 헤더 부분 제외
-               !(it.startsWith("username,"))
+                !(it.startsWith("username,"))
             }.map {
 
                 val currentThread = Thread.currentThread()
@@ -165,40 +169,44 @@ class EvaluationResultService (
                 log.info(it.toString())
             }
     }
-    suspend fun getResults(
+
+    fun getResults(
         slackMembers: Flow<SlackMemberVO>,
         startDateTime: LocalDateTime,
-        endDateTime: LocalDateTime) : Flow<SlackMemberVO> {
+        endDateTime: LocalDateTime
+    ): Flow<SlackMemberVO> {
 
-        return slackMembers.map {
-            val currentThread = Thread.currentThread()
-            val result = this.getEvaluationResultBySlackUserId(it.userId, startDateTime, endDateTime)
-            it.result = result.reason
-            if (log.isDebugEnabled) {
-                log.debug("getResults Thread name: ${currentThread.name}")
-                log.debug("${it.userId}: ${it.result}")
+        return slackMembers.flowOn(Dispatchers.IO)
+            .map {
+                val result = this.getEvaluationResultBySlackUserId(it.userId, startDateTime, endDateTime)
+                it.result = result.reason
+                if (log.isDebugEnabled) {
+                    val currentThread = Thread.currentThread()
+                    log.debug("getResults Thread name: ${currentThread.name}")
+                    log.debug("${it.userId}: ${it.result}")
+                }
+                it
             }
-            it
-        }
     }
 
     @OptIn(FlowPreview::class)
-    suspend fun writeCsv(slackMembers: Flow<SlackMemberVO>) : Flow<ByteArray> {
+    fun writeCsv(slackMembers: Flow<SlackMemberVO>): Flow<ByteArray> {
         // header
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         val header = flowOf("userid,fullname,displayname,result_${now}\n".toByteArray())
 
-        val rows = slackMembers.map { "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray() }
+        val rows =
+            slackMembers.map { "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray() }
 
         return flowOf(header, rows)
+            .flowOn(Dispatchers.IO)
             .flattenConcat()
             .onEach {
-                val currentThread = Thread.currentThread()
                 if (log.isDebugEnabled) {
+                    val currentThread = Thread.currentThread()
                     log.debug("write line Thread name: ${currentThread.name}")
                     log.debug("write line: ${String(it, Charsets.UTF_8)}")
                 }
             }
-
     }
 }
