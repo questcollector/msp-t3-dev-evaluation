@@ -6,7 +6,7 @@ import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -63,7 +63,7 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        runBlocking {
+        runTest {
             val createdMessageDataEntity = messageDataCommandService.createMessageDataEntity(message)
             val savedMessageDataEntity = messageDataCommandService.saveMessageDataEntity(createdMessageDataEntity)
             assertThat(savedMessageDataEntity)
@@ -80,12 +80,16 @@ class MessageDataCommandServiceTests {
             .setHeader("SlackUserId", "id")
             .build()
 
+        coEvery { slackUserInfoService.getSlackUserNameWithSlackUserId("id") } returns "test"
+
         val messageDataCommandService = MessageDataCommandService(
             messageDataRepository,
             slackUserInfoService
         )
-
-        val result = messageDataCommandService.calculateIsPass(message.headers, "test")
-        assertThat(result).isTrue
+        
+        runTest {
+            val result = messageDataCommandService.createMessageDataEntity(message)
+            assertThat(result.isPass).isTrue
+        }
     }
 }
