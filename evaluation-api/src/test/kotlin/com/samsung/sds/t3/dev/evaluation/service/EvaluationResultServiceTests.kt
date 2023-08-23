@@ -225,6 +225,7 @@ class EvaluationResultServiceTests {
         }
     }
 
+    @FlowPreview
     @Test
     fun `csv 파일 쓰기`() {
         val slackMember = SlackMemberVO(
