@@ -27,6 +27,9 @@ class EvaluationResultService(
         startDateTime: LocalDateTime,
         endDateTime: LocalDateTime
     ): EvaluationResultDTO {
+
+        log.info("getEvaluationResultBySlackUserId invoked")
+
         val messages = messageDataRepository.findAllBySlackUserId(slackUserId)
 
         if (messages.count() == 0) {
@@ -81,7 +84,7 @@ class EvaluationResultService(
     suspend fun isCheated(instanceId: String): Boolean {
         val messages = messageDataRepository.findAllByInstanceId(instanceId)
 
-        val slackUserIds = messages
+        val slackUserIds = messages.flowOn(Dispatchers.IO)
             .filter { it.isPass }
             .mapNotNull { it.slackUserId }
             .filterNotNull().toSet()
@@ -91,13 +94,13 @@ class EvaluationResultService(
 
     @FlowPreview
     fun readCsv(data: Flow<ByteArray>): Flow<SlackMemberVO> {
+        log.info("readCsv invoked")
+
         // line이 잘렸을 때 앞 부분을 임시로 저장하는 변수
         val remainingBytesChannel = Channel<ByteArray>(Channel.CONFLATED)
 
         CoroutineScope(Dispatchers.IO).launch {
-            if (log.isDebugEnabled) {
-                log.debug("send empty ByteArray to Channel")
-            }
+            // send initial value as empty ByteArray
             remainingBytesChannel.send(ByteArray(0))
         }
 
@@ -119,11 +122,6 @@ class EvaluationResultService(
         bytes: ByteArray
     ) = flow {
 
-        if (log.isDebugEnabled) {
-            val currentThread = Thread.currentThread()
-            log.debug("ByteArray -> String(line) Thread name: ${currentThread.name}")
-        }
-
         // flow로 넘어온 ByteArray와 remainingBytes 합치기
         val remainingBytes = remainingBytesChannel.receive()
         val combinedData = remainingBytes + bytes
@@ -134,9 +132,6 @@ class EvaluationResultService(
         for (char in rawData) {
             when (char) {
                 '\n' -> {
-                    if (log.isDebugEnabled) {
-                        log.debug("currentLine: $line")
-                    }
                     // 데이터 완결 시 바로 publish
                     emit(line.toString())
                     line.clear()
@@ -150,21 +145,16 @@ class EvaluationResultService(
             }
         }
 
-        // 줄이 잘린 경우 현재 라인을 배열에 저장
-        if (log.isDebugEnabled) {
-            log.debug("remainingBytes: $line")
-        }
+        // 남은 라인을 채널에 저장
         remainingBytesChannel.send(line.toString().toByteArray(Charsets.UTF_8))
     }
 
     private fun convertRowToSlackMemberVO(row: String): SlackMemberVO {
-        if (log.isDebugEnabled) {
-            val currentThread = Thread.currentThread()
-            log.debug("getResults Thread name: ${currentThread.name}")
-        }
 
         val columns = row.split(',', ignoreCase = false)
 
+        // columns 구성
+        // username | email | status | billing-active | has-2fa | has-sso | userid | fullname | displayname | expiration-timestamp
         val (status, billingActive, userId, fullname, displayname) =
             arrayOf(
                 columns[2],
@@ -189,37 +179,31 @@ class EvaluationResultService(
         endDateTime: LocalDateTime
     ): Flow<SlackMemberVO> {
 
+        log.info("getResults invoked")
+
         return slackMembers.flowOn(Dispatchers.IO)
             .map {
                 val result = this.getEvaluationResultBySlackUserId(it.userId, startDateTime, endDateTime)
                 it.result = result.reason
-                if (log.isDebugEnabled) {
-                    val currentThread = Thread.currentThread()
-                    log.debug("getResults Thread name: ${currentThread.name}")
-                    log.debug("${it.userId}: ${it.result}")
-                }
-                it
+
+                return@map it
             }
     }
 
     @FlowPreview
     fun writeCsv(slackMembers: Flow<SlackMemberVO>): Flow<ByteArray> {
+
+        log.info("writeCsv invoked")
+
         // header
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         val header = flowOf("userid,fullname,displayname,result_${now}\n".toByteArray())
 
-        val rows =
-            slackMembers.map { "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray() }
-
-        return flowOf(header, rows)
-            .flowOn(Dispatchers.IO)
-            .flattenConcat()
-            .onEach {
-                if (log.isDebugEnabled) {
-                    val currentThread = Thread.currentThread()
-                    log.debug("write line Thread name: ${currentThread.name}")
-                    log.debug("write line: ${String(it, Charsets.UTF_8)}")
-                }
+        val rows = slackMembers.map {
+                "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray()
             }
+
+        return flowOf(header, rows).flowOn(Dispatchers.IO)
+            .flattenConcat()
     }
 }
