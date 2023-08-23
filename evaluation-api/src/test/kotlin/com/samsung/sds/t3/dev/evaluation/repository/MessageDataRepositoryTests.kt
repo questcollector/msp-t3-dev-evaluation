@@ -3,7 +3,7 @@ package com.samsung.sds.t3.dev.evaluation.repository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -42,7 +42,7 @@ class MessageDataRepositoryTests (
 
     @BeforeAll
     fun `테스트 데이터 입력`() {
-        runBlocking {
+        runTest {
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = TODAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
@@ -53,14 +53,14 @@ class MessageDataRepositoryTests (
 
     @AfterAll
     fun `테스트 데이터 삭제`() {
-        runBlocking {
+        runTest {
             messageDataRepository.deleteAll()
         }
     }
 
     @Test
     fun `유저 이름으로 보낸 메시지 조회하기`() {
-        runBlocking {
+        runTest {
             val result = messageDataRepository.findAllBySlackUserNameStartsWith(TEST)
             assertThat(result.toList()).containsAll(
                 entities.subList(2, 4)
@@ -70,7 +70,7 @@ class MessageDataRepositoryTests (
 
     @Test
     fun `특정 uuid 데이터 조회`() {
-        runBlocking {
+        runTest {
             val result = messageDataRepository.findById(SAMPLE_UUID)
             assertThat(result).isEqualTo(entities[4])
         }

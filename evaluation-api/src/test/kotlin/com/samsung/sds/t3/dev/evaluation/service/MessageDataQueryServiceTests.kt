@@ -7,7 +7,7 @@ import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -39,7 +39,7 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = messageDataQueryService.getMessageDataDuring(
                 YESTERDAY, TODAY
             )
@@ -65,7 +65,7 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = messageDataQueryService.getMessageDataDuring()
             assertThat(result.toList())
                 .contains(entities.first().toMessageDataDTO())
@@ -86,7 +86,7 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = messageDataQueryService.getMessageDataWithSlackUserName(TEST)
 
             assertThat(result.toList()).containsAll(
