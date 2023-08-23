@@ -32,7 +32,7 @@ class MessageDataQueryService(
 
         return messageDataEntities.flowOn(Dispatchers.IO)
             .filterNotNull()
-            .filter { it.sentDateTime.isAfter(start) && it.sentDateTime.isBefore(end) }
+            .filter { it.sentDateTime in (start..< end) }
             .map { entity -> entity.toMessageDataDTO() }
     }
 
