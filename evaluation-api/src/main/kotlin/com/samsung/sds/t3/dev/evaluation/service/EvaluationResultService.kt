@@ -28,40 +28,40 @@ class EvaluationResultService (
         var reason = "OK"
 
         if (messages.count() == 0) {
-            result = false
-            reason = "메시지 없음"
-        } else {
-            val filteredMessages = messages.filter {
-                (it.sentDateTime.isAfter(startDateTime) || it.sentDateTime.isEqual(startDateTime))
-                        && it.sentDateTime.isBefore(endDateTime)
-            }
+            return EvaluationResultDTO(
+                result = false,
+                reason = "메시지 없음",
+                data = emptyList<MessageDataDTO>()
+            )
+        }
+        val filteredMessages = messages.filter {
+            (it.sentDateTime in (startDateTime..endDateTime)) &&
+                    (it.sentDateTime.isBefore(endDateTime))
+        }
 
-            val passedMessages = filteredMessages.filterNotNull().filter { it.isPass }
+        val passedMessages = filteredMessages.filter { it.isPass }
 
-            val instanceId = filteredMessages.mapNotNull {
-                it.instanceId
-            }.filterNotNull().toSet()
+        val instanceId = filteredMessages.mapNotNull { it.instanceId }.toSet()
 
-            val ipAddress = filteredMessages.mapNotNull {
-                it.ipAddress
-            }.filterNotNull().toSet()
+        val ipAddress = filteredMessages.mapNotNull { it.ipAddress }.toSet()
 
-            if (log.isDebugEnabled) {
-                log.debug("passed Message Count: ${filteredMessages.count()}")
-                log.debug("instanceId: $instanceId")
-                log.debug("ipAddress: $ipAddress")
-            }
+        if (log.isDebugEnabled) {
+            log.debug("passed Message Count: ${filteredMessages.count()}")
+            log.debug("instanceId: $instanceId")
+            log.debug("ipAddress: $ipAddress")
+        }
 
-            if (passedMessages.count() == 0) {
-                result = false
-                reason = "통과한 메시지 없음"
-            } else if (instanceId.count() > 1 || ipAddress.count() > 1) {
-                result = false
-                reason = "복수의 VM에서 실행한 것으로 보임"
-            } else if (isCheated(instanceId.first())) {
-                result = false
-                reason = "하나의 VM에서 여러 명이 실행한 것으로 보임"
-            }
+        val (result, reason) = when {
+            (passedMessages.count() == 0) ->
+                false to "통과한 메시지 없음"
+
+            (instanceId.count() > 1 || ipAddress.count() > 1) ->
+                false to "복수의 VM에서 실행한 것으로 보임"
+
+            (isCheated(instanceId.first())) ->
+                false to "하나의 VM에서 여러 명이 실행한 것으로 보임"
+
+            else -> true to "OK"
         }
 
         val messageDTOs = messages.map { it.toMessageDataDTO() }.toList()
