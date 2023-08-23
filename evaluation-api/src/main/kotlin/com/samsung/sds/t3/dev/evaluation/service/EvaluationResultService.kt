@@ -39,22 +39,11 @@ class EvaluationResultService(
                 data = emptyList()
             )
         }
-        val filteredMessages = messages.filter {
-            (it.sentDateTime in (startDateTime..endDateTime)) &&
-                    (it.sentDateTime.isBefore(endDateTime))
-        }
 
+        val filteredMessages = messages.filter { it.sentDateTime in (startDateTime..< endDateTime) }
         val passedMessages = filteredMessages.filter { it.isPass }
-
         val instanceId = filteredMessages.mapNotNull { it.instanceId }.toSet()
-
         val ipAddress = filteredMessages.mapNotNull { it.ipAddress }.toSet()
-
-        if (log.isDebugEnabled) {
-            log.debug("passed Message Count: ${filteredMessages.count()}")
-            log.debug("instanceId: $instanceId")
-            log.debug("ipAddress: $ipAddress")
-        }
 
         val (result, reason) = when {
             (passedMessages.count() == 0) ->
