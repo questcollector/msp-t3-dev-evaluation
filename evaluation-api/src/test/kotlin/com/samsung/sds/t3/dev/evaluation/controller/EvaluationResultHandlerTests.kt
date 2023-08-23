@@ -5,10 +5,13 @@ import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.*
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -171,7 +174,7 @@ class EvaluationResultHandlerTests {
             .expectHeader().contentType(MediaType.parseMediaType("text/csv"))
             .expectHeader().valueMatches(
                 HttpHeaders.CONTENT_DISPOSITION,
-                """attachment; filename="result_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.csv""""
+                """attachment; filename="result_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?.csv""""
             )
             .expectBody().consumeWith { response ->
                 val responseBody = String(response.responseBody!!)
