@@ -21,11 +21,12 @@ class MessageDataQueryService(
         startDateTime: LocalDateTime? = null,
         endDateTime: LocalDateTime? = null
     ): Flow<MessageDataDTO> {
+
+        log.info("getMessageDataDuring invoked")
+
         val now = LocalDateTime.now().withNano(0)
         val start = startDateTime ?: now.minusDays(1)
         val end = endDateTime ?: now
-
-        if (log.isDebugEnabled) log.debug("converted dateTime: \nstart: $start\nend: $end")
 
         val messageDataEntities = messageDataRepository.findAll()
 
@@ -36,6 +37,7 @@ class MessageDataQueryService(
     }
 
     fun getMessageDataWithSlackUserName(slackUserName: String): Flow<MessageDataDTO> {
+        log.info("getMessageDataWithSlackUserName invoked")
         val messageDataEntities = messageDataRepository.findAllBySlackUserNameStartsWith(slackUserName)
 
         return messageDataEntities.flowOn(Dispatchers.IO)
@@ -45,6 +47,7 @@ class MessageDataQueryService(
     }
 
     fun getMessageDataWithInstanceId(instanceId: String): Flow<MessageDataDTO> {
+        log.info("getMessageDataWithInstanceId invoked")
         val messageDataEntities = messageDataRepository.findAllByInstanceId(instanceId)
 
         return messageDataEntities.flowOn(Dispatchers.IO)
@@ -54,14 +57,12 @@ class MessageDataQueryService(
     }
 
     suspend fun getMessageDataByMessageUuid(messageId: String): MessageDataDTO? {
+        log.info("getMessageDataByMessageUuid invoked")
         return try {
             messageDataRepository.findById(UUID.fromString(messageId))?.toMessageDataDTO()
         } catch (e: IllegalArgumentException) {
             log.info("uuid is not a valid form: $messageId")
             null
         }
-
     }
-
-
 }
