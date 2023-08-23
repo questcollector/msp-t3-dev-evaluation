@@ -1,13 +1,15 @@
 package com.samsung.sds.t3.dev.evaluation.service
 
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
-import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,7 +33,7 @@ class EvaluationResultService(
             return EvaluationResultDTO(
                 result = false,
                 reason = "메시지 없음",
-                data = emptyList<MessageDataDTO>()
+                data = emptyList()
             )
         }
         val filteredMessages = messages.filter {
@@ -90,84 +92,95 @@ class EvaluationResultService(
     @FlowPreview
     fun readCsv(data: Flow<ByteArray>): Flow<SlackMemberVO> {
         // line이 잘렸을 때 앞 부분을 임시로 저장하는 변수
-        var remainingBytes: ByteArray? = null
+        val remainingBytesChannel = Channel<ByteArray>(Channel.CONFLATED)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            if (log.isDebugEnabled) {
+                log.debug("send empty ByteArray to Channel")
+            }
+            remainingBytesChannel.send(ByteArray(0))
+        }
 
         return data.flowOn(Dispatchers.IO)
             // ByteArray -> String(line)
             .flatMapConcat { bytes ->
-                flow<String> {
-                    val currentThread = Thread.currentThread()
-                    if (log.isDebugEnabled) log.debug("ByteArray -> String(line) Thread name: ${currentThread.name}")
-                    val line = StringBuilder()
+                produceStringLineFromBytes(remainingBytesChannel, bytes)
+            }.buffer()
+            // 헤더 부분 제외
+            .filter { !(it.startsWith("username,")) }
+            // String row를 SlackMemberVO로 변환
+            .map(::convertRowToSlackMemberVO)
+            // Member(수강생 계정)와 활성화된 계정만 필터링
+            .filter { (it.status == "Member" && it.billingActive == 1) }
+    }
 
-                    // 줄이 잘렸을 경우 잘린 앞부분을 저장한 배열과 합함
-                    val combinedData = if (remainingBytes != null) {
-                        remainingBytes!! + bytes
-                    } else {
-                        bytes
+    private fun produceStringLineFromBytes(
+        remainingBytesChannel: Channel<ByteArray>,
+        bytes: ByteArray
+    ) = flow {
+
+        if (log.isDebugEnabled) {
+            val currentThread = Thread.currentThread()
+            log.debug("ByteArray -> String(line) Thread name: ${currentThread.name}")
+        }
+
+        // flow로 넘어온 ByteArray와 remainingBytes 합치기
+        val remainingBytes = remainingBytesChannel.receive()
+        val combinedData = remainingBytes + bytes
+        val rawData = combinedData.toString(Charsets.UTF_8)
+
+        // 라인 분리
+        val line = StringBuilder()
+        for (char in rawData) {
+            when (char) {
+                '\n' -> {
+                    if (log.isDebugEnabled) {
+                        log.debug("currentLine: $line")
                     }
-
-                    val rawData = combinedData.toString(Charsets.UTF_8)
-                    // 라인 분리
-                    for (char in rawData) {
-                        when (char) {
-                            '\n' -> {
-                                if (log.isDebugEnabled) log.debug("currentLine: ${line.toString()}")
-                                // 데이터 완결 시 바로 publish
-                                emit(line.toString())
-                                line.clear()
-                            }
-
-                            '\r' -> {
-                                // nothing, ignore carriage return
-                            }
-
-                            else -> line.append(char)
-                        }
-                    }
-
-                    // 줄이 잘린 경우 현재 라인을 배열에 저장
-                    remainingBytes = if (line.isNotEmpty()) {
-                        if (log.isDebugEnabled) log.debug("remainingBytes: $line")
-                        line.toString().toByteArray(Charsets.UTF_8)
-                    } else {
-                        null
-                    }
+                    // 데이터 완결 시 바로 publish
+                    emit(line.toString())
+                    line.clear()
                 }
-            }.buffer().filter {
-                // 헤더 부분 제외
-                !(it.startsWith("username,"))
-            }.map {
 
-                val currentThread = Thread.currentThread()
-                if (log.isDebugEnabled) log.debug("String -> SlackMemberVO Thread name: ${currentThread.name}")
+                '\r' -> {
+                    // nothing, ignore carriage return
+                }
 
-                // String row -> SlackMemberVO
-                val columns = it.split(',', ignoreCase = false)
-
-                val (status, billingActive, userId, fullname, displayname) =
-                    arrayOf(
-                        columns[2],
-                        columns[3],
-                        columns[6],
-                        columns[7],
-                        columns[8]
-                    )
-
-                SlackMemberVO(
-                    status.trim(),
-                    billingActive.toInt(),
-                    userId.trim(),
-                    fullname.trim().removeSurrounding("\""),
-                    displayname.trim().removeSurrounding("\"")
-                )
-
-            }.filter {
-                // Member(수강생 계정)와 활성화된 계정만 필터링
-                (it.status == "Member" && it.billingActive == 1)
-            }.catch {
-                log.info(it.toString())
+                else -> line.append(char)
             }
+        }
+
+        // 줄이 잘린 경우 현재 라인을 배열에 저장
+        if (log.isDebugEnabled) {
+            log.debug("remainingBytes: $line")
+        }
+        remainingBytesChannel.send(line.toString().toByteArray(Charsets.UTF_8))
+    }
+
+    private fun convertRowToSlackMemberVO(row: String): SlackMemberVO {
+        if (log.isDebugEnabled) {
+            val currentThread = Thread.currentThread()
+            log.debug("getResults Thread name: ${currentThread.name}")
+        }
+
+        val columns = row.split(',', ignoreCase = false)
+
+        val (status, billingActive, userId, fullname, displayname) =
+            arrayOf(
+                columns[2],
+                columns[3],
+                columns[6],
+                columns[7],
+                columns[8]
+            )
+
+        return SlackMemberVO(
+            status.trim(),
+            billingActive.toInt(),
+            userId.trim(),
+            fullname.trim().removeSurrounding("\""),
+            displayname.trim().removeSurrounding("\"")
+        )
     }
 
     fun getResults(
@@ -189,7 +202,7 @@ class EvaluationResultService(
             }
     }
 
-    @OptIn(FlowPreview::class)
+    @FlowPreview
     fun writeCsv(slackMembers: Flow<SlackMemberVO>): Flow<ByteArray> {
         // header
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
