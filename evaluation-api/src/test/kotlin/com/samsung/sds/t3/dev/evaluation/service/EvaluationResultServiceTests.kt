@@ -179,7 +179,7 @@ class EvaluationResultServiceTests {
         }
     }
 
-    @OptIn(FlowPreview::class)
+    @FlowPreview
     @Test
     fun `csv ByteArray를 SlackMemberVO로 변환`() {
         val csv = flow<ByteArray> {

@@ -20,7 +20,7 @@ import org.springframework.web.reactive.function.server.coRouter
 
 @Configuration
 class EvaluationResultRouter {
-    @OptIn(FlowPreview::class)
+    @FlowPreview
     @Bean
     @RouterOperations(*arrayOf(
         RouterOperation(
