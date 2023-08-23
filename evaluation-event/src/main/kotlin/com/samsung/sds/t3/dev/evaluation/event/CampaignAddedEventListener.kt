@@ -3,6 +3,7 @@ package com.samsung.sds.t3.dev.evaluation.event
 import com.samsung.sds.t3.dev.evaluation.model.CampaignDTO
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataCommandService
 import com.samsung.sds.t3.dev.evaluation.service.SlackMessagingService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -24,24 +25,25 @@ class CampaignAddedEventListener (
 
     @Bean
     fun campaignAddedEvent(): Consumer<Flux<Message<CampaignDTO>>> = Consumer { message ->
+        log.info("campaignAddedEvent invoked")
         message.concatMap {
-            mono { handleMessage(it) }
+            mono(Dispatchers.IO) { handleMessage(it) }
         }.onErrorContinue { e, _ ->
             log.error(e.message, e)
         }.subscribe()
     }
 
     suspend fun handleMessage(message: Message<CampaignDTO>) {
+
         val entity = messageDataCommandService.createMessageDataEntity(message)
         val saved = messageDataCommandService.saveMessageDataEntity(entity)
 
-        log.info("Saved message:")
-        if (log.isDebugEnabled) log.debug("$saved")
-
         if (saved.isPass) {
+            log.info("student send appropriate message")
             slackMessagingService.postMessage(saved)
             notificationEventPublisher.publishNotificationSuccessEvent(saved)
         } else {
+            log.info("student send erroneous message")
             saved.slackUserId?.run {
                 notificationEventPublisher.publishNotificationFailedEvent(saved)
             }
