@@ -5,7 +5,7 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: evaluation-event ci pipeline
+name: evaluation-api ci pipeline
 
 on:
   workflow_dispatch:
@@ -25,16 +25,21 @@ on:
         type: boolean
 #  push:
 #    paths:
-#      - 'evaluation-event/**'
+#      - 'evaluation-api/**'
 #    branches: [ "main" ]
 
 permissions:
   id-token: write
   contents: read
 
-jobs:    
+jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PROJECT: evaluation-event
+      TAG: latest
+      ROLE_ARN: arn:aws:iam::275291497228:role/github-actions-ecr-full-access
+      AWS_REGION: us-east-1
     
     steps:
     - uses: actions/checkout@v3
@@ -46,36 +51,27 @@ jobs:
         distribution: zulu
         cache: 'gradle'
     
-    # - name: Gradle Caching
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: |  
-    #         ~/.gradle/caches
-    #         ~/.gradle/wrapper
-    #     key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-    #     restore-keys: |
-    #         ${{ runner.os }}-gradle-
-        
     - name: Gradle build
       run: |
-        cd evaluation-event/
+        cd ${{ env.PROJECT }}/
         ./gradlew build
         
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v3
       with:
-        role-to-assume: arn:aws:iam::275291497228:role/github-actions-ecr-full-access
-        aws-region: us-east-1
+        role-to-assume: ${{ env.ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR Private
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
+      with:
+        mask-password: 'true'
       
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
       with:
-        context: ./evaluation-event
+        context: ./${{ env.PROJECT }}
         push: true
         tags: |
-          275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest
-        cache-from: type=registry,ref=275291497228.dkr.ecr.us-east-1.amazonaws.com/evaluation-event:latest
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT }}:${{ env.TAG }}
