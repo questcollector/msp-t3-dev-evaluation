@@ -3,14 +3,13 @@ package com.samsung.sds.t3.dev.evaluation.service
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.slack.api.Slack
 import com.slack.api.methods.request.auth.AuthTestRequest
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
-import kotlin.NoSuchElementException
 
 class SlackMessagingServiceTests {
 
@@ -42,7 +41,7 @@ class SlackMessagingServiceTests {
         val slackMessagingService = SlackMessagingService(slack)
         slackMessagingService.slackToken = token
 
-        runBlocking {
+        runTest {
             val directChannel = slackMessagingService.getDirectChannel(userId)
 
             println(directChannel)
@@ -55,7 +54,7 @@ class SlackMessagingServiceTests {
         val slackMessagingService = SlackMessagingService(slack)
         slackMessagingService.slackToken = token
 
-        runBlocking {
+        runTest {
             
             val directChannel = slackMessagingService.getDirectChannel("<<SLACK_USER_ID>>")
             assertThat(directChannel.error).isEqualTo("user_not_found")
@@ -73,7 +72,7 @@ class SlackMessagingServiceTests {
             slackUserId = userId
         )
 
-        runBlocking {
+        runTest {
             val response = slackMessagingService.postMessage(message)
             assertThat(response.isOk).isTrue
 
@@ -89,7 +88,7 @@ class SlackMessagingServiceTests {
             slackUserId = "<<SLACK_USER_ID>>"
         )
 
-        runBlocking {
+        runTest {
             assertThrows<NoSuchElementException> {
                 slackMessagingService.postMessage(message)
             }

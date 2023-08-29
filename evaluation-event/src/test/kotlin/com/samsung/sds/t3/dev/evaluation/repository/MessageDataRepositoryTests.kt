@@ -2,7 +2,7 @@ package com.samsung.sds.t3.dev.evaluation.repository
 
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
@@ -14,7 +14,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
-import java.util.*
 
 
 private const val TEST = "test"
@@ -37,7 +36,7 @@ class MessageDataRepositoryTests (
 
     @BeforeAll
     fun `테스트 데이터 입력`() {
-        runBlocking {
+        runTest {
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = TODAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
@@ -48,7 +47,7 @@ class MessageDataRepositoryTests (
 
     @AfterAll
     fun `테스트 데이터 삭제`() {
-        runBlocking {
+        runTest {
             messageDataRepository.deleteAll()
         }
     }

@@ -5,10 +5,13 @@ import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.*
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -48,7 +51,7 @@ class EvaluationResultHandlerTests {
     @Test
     fun `startDate, endDate 안보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runBlocking {
+        runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
@@ -68,7 +71,7 @@ class EvaluationResultHandlerTests {
     @Test
     fun `이상한 startDate, endDate 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runBlocking {
+        runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
@@ -95,7 +98,7 @@ class EvaluationResultHandlerTests {
         val startDateTime = LocalDateTime.parse(startDate)
         val endDateTime = LocalDateTime.parse(endDate)
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runBlocking {
+        runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, startDateTime, endDateTime))
                 .willReturn(result)
@@ -147,7 +150,7 @@ class EvaluationResultHandlerTests {
         }
 
         // Mocking
-        runBlocking {
+        runTest {
             given(evaluationResultService.readCsv(any()))
                 .willReturn(slackMembers)
             given(evaluationResultService.getResults(slackMembers, LocalDateTime.MIN, LocalDateTime.MAX))
@@ -171,7 +174,7 @@ class EvaluationResultHandlerTests {
             .expectHeader().contentType(MediaType.parseMediaType("text/csv"))
             .expectHeader().valueMatches(
                 HttpHeaders.CONTENT_DISPOSITION,
-                """attachment; filename="result_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.csv""""
+                """attachment; filename="result_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?.csv""""
             )
             .expectBody().consumeWith { response ->
                 val responseBody = String(response.responseBody!!)

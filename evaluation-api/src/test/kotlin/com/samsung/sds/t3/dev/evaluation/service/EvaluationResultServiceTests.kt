@@ -10,7 +10,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,7 +38,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", true)
@@ -59,7 +59,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", true)
@@ -78,7 +78,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -93,7 +93,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -113,7 +113,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -133,7 +133,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -154,7 +154,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId("user1", LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -173,13 +173,13 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.isCheated("instanceId")
             assertThat(result).isEqualTo(false)
         }
     }
 
-    @OptIn(FlowPreview::class)
+    @FlowPreview
     @Test
     fun `csv ByteArray를 SlackMemberVO로 변환`() {
         val csv = flow<ByteArray> {
@@ -197,7 +197,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val slackMembers = evaluationResultService.readCsv(csv)
             assertThat(slackMembers.first()).isEqualTo(slackMember)
         }
@@ -219,12 +219,13 @@ class EvaluationResultServiceTests {
             evaluationResultService.getEvaluationResultBySlackUserId("U059H0Z4PH6", LocalDateTime.MIN, LocalDateTime.MAX)
         } returns EvaluationResultDTO(true, "OK", emptyList())
 
-        runBlocking {
+        runTest {
             val slackMembers = evaluationResultService.getResults(flowOf(slackMember), LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(slackMembers.first().result).isEqualTo("OK")
         }
     }
 
+    @FlowPreview
     @Test
     fun `csv 파일 쓰기`() {
         val slackMember = SlackMemberVO(
@@ -241,7 +242,7 @@ class EvaluationResultServiceTests {
         val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}".toRegex()
         val csvRow = "${slackMember.userId},\"${slackMember.fullname}\",\"${slackMember.displayname}\",${slackMember.result}"
 
-        runBlocking {
+        runTest {
             val bytes = evaluationResultService.writeCsv(flowOf(slackMember))
                 .reduce { accumulator, value ->  accumulator + value}
             val content = String(bytes, Charsets.UTF_8).split("\n")

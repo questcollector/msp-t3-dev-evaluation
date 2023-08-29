@@ -22,6 +22,7 @@ class SlackUserInfoService (
 
     @Cacheable(cacheNames = ["slackUserName"], key = "#slackUserId")
     suspend fun getSlackUserNameWithSlackUserId(slackUserId: String): String? {
+        log.info("getSlackUserNameWithSlackUserId invoked")
         val response = slack.methodsAsync(slackToken).usersInfo(
             UsersInfoRequest.builder()
                 .user(slackUserId)
@@ -29,14 +30,12 @@ class SlackUserInfoService (
         )
 
         return suspendCoroutine {
-            response.whenComplete { t, u ->
+            response.whenComplete { t, _ ->
                 if (t.isOk) {
                     log.info("Success getSlackUserNameWithSlackUserId")
-                    if (log.isDebugEnabled) log.debug("$t")
                     it.resume(t.user.realName)
                 } else {
                     log.info("Error on getSlackUserNameWithSlackUserId")
-                    if (log.isDebugEnabled) log.debug("$t")
                     it.resume(null)
                 }
             }

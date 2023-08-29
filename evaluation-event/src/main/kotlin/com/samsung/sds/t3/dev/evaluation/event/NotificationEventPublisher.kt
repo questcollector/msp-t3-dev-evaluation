@@ -28,7 +28,6 @@ class NotificationEventPublisher(
         streamBridge.send("notificationSuccessEvent-out-0",
             message)
         log.info("Success event: message was sent to ${messageDataDTO.slackUserId}")
-        if (log.isDebugEnabled) log.debug("message payload: \n$payload")
     }
 
     suspend fun publishNotificationFailedEvent(messageDataDTO: MessageDataEntity) {
@@ -44,6 +43,5 @@ class NotificationEventPublisher(
         streamBridge.send("notificationFailedEvent-out-0",
             message)
         log.info("Failed event: message was sent to ${messageDataDTO.slackUserId}")
-        if (log.isDebugEnabled) log.debug("message payload: \n$payload")
     }
 }

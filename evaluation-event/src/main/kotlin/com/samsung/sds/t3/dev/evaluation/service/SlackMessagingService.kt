@@ -27,10 +27,12 @@ class SlackMessagingService (
     lateinit var slackToken: String
 
     suspend fun postMessage(message: MessageDataEntity) : ChatPostMessageResponse {
+
+        log.info("postMessage invoked")
+
         val payload = buildMessageContent(message)
 
         val directChannel = getDirectChannel(message.slackUserId!!)
-        if (log.isDebugEnabled) log.debug("directChannel: $directChannel")
         if (!directChannel.isOk) throw NoSuchElementException(message.slackUserId)
 
         val response = slack.methodsAsync(slackToken).chatPostMessage(
@@ -43,11 +45,9 @@ class SlackMessagingService (
             response.whenComplete { t, u ->
                 if (t.isOk) {
                     log.info("Success postMessage")
-                    if (log.isDebugEnabled) log.debug("send Message response: \n$t")
                     it.resume(t)
                 } else {
                     log.info("Error on postMessage: ${t.error}")
-                    if (log.isDebugEnabled) log.debug("Error on postMessage: \n$t")
                     it.resumeWithException(u)
                 }
             }
@@ -56,6 +56,9 @@ class SlackMessagingService (
 
     @Cacheable(cacheNames = ["directChannels"], key = "#slackUserId")
     suspend fun getDirectChannel(slackUserId : String) : ConversationsOpenResponse {
+
+        log.info("getDirectChannel invoked")
+
         val response = slack.methodsAsync(slackToken).conversationsOpen(
             ConversationsOpenRequest.builder()
                 .returnIm(true)
@@ -63,12 +66,12 @@ class SlackMessagingService (
                 .build()
         )
         return suspendCoroutine {
-            response.whenComplete { t, u ->
+            response.whenComplete { t, _ ->
                 if (t.isOk) {
+                    log.info("Direct channel created")
                     it.resume(t)
                 } else {
                     log.info("Error on getDirectChannels: ${t.error}")
-                    if (log.isDebugEnabled) log.debug("$t")
                     it.resume(t)
                 }
             }
