@@ -9,8 +9,10 @@ import io.mockk.coVerify
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.messaging.support.GenericMessage
 import org.springframework.messaging.support.MessageBuilder
 import reactor.core.publisher.Flux
 
@@ -32,7 +34,10 @@ class CampaignAddedEventTests {
 
         val messageEntity = MessageDataEntity(isPass = false)
 
-        coEvery { messageDataCommandService.createMessageDataEntity(any()) } returns messageEntity
+
+        val messageSlot = mutableListOf<GenericMessage<CampaignDTO>>()
+
+        coEvery { messageDataCommandService.createMessageDataEntity(capture(messageSlot)) } returns messageEntity
         coEvery { messageDataCommandService.saveMessageDataEntity(messageEntity) } returns messageEntity
 
         val campaignAddedEventListener = CampaignAddedEventListener(
@@ -45,5 +50,8 @@ class CampaignAddedEventTests {
 
         coVerify { messageDataCommandService.createMessageDataEntity(messageDataDTO = any()) }
 
+        assertThat(messageSlot.map { it.payload })
+            .allMatch { it.campaignId in 1 .. 3 }
+            .allMatch { it.campaignName in listOf("name1", "name2", "name3") }
     }
 }
