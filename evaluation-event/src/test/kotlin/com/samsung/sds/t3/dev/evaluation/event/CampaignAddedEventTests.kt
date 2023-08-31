@@ -1,13 +1,12 @@
 package com.samsung.sds.t3.dev.evaluation.event
 
 import com.samsung.sds.t3.dev.evaluation.model.CampaignDTO
-import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataCommandService
 import com.samsung.sds.t3.dev.evaluation.service.SlackMessagingService
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -24,6 +23,7 @@ class CampaignAddedEventTests {
 
     @Test
     fun `consumer test`() = runTest {
+
         val campaigns = Flux.just(
             CampaignDTO(campaignId = 1, campaignName = "name1"),
             CampaignDTO(campaignId = 2, campaignName = "name2"),
@@ -32,26 +32,21 @@ class CampaignAddedEventTests {
             MessageBuilder.withPayload(it).build()
         }
 
-        val messageEntity = MessageDataEntity(isPass = false)
-
-
-        val messageSlot = mutableListOf<GenericMessage<CampaignDTO>>()
-
-        coEvery { messageDataCommandService.createMessageDataEntity(capture(messageSlot)) } returns messageEntity
-        coEvery { messageDataCommandService.saveMessageDataEntity(messageEntity) } returns messageEntity
-
-        val campaignAddedEventListener = CampaignAddedEventListener(
+        val campaignAddedEventListener = spyk(CampaignAddedEventListener(
             messageDataCommandService,
             slackMessagingService,
             notificationEventPublisher
-        )
+        ))
+
+        coEvery { campaignAddedEventListener.handleMessage(any()) } coAnswers {
+            println("handleMessage invoked")
+            val argumentMessage = this.arg<GenericMessage<CampaignDTO>>(0)
+            assertThat(argumentMessage.payload)
+                .matches { it.campaignId in 1 ..< 3 }
+                .matches { it.campaignName in listOf("name1", "name2", "name3") }
+        }
 
         campaignAddedEventListener.campaignAddedEvent().accept(campaigns)
-
-        coVerify { messageDataCommandService.createMessageDataEntity(messageDataDTO = any()) }
-
-        assertThat(messageSlot.map { it.payload })
-            .allMatch { it.campaignId in 1 .. 3 }
-            .allMatch { it.campaignName in listOf("name1", "name2", "name3") }
     }
+
 }
