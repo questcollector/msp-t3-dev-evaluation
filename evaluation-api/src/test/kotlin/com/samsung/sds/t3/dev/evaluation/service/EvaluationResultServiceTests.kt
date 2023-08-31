@@ -8,16 +8,19 @@ import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.spyk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertLinesMatch
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
 
 private const val TEST = "test"
 
+@ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
 class EvaluationResultServiceTests {
 
@@ -239,15 +242,14 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}".toRegex()
+        val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?"
         val csvRow = "${slackMember.userId},\"${slackMember.fullname}\",\"${slackMember.displayname}\",${slackMember.result}"
 
         runTest {
             val bytes = evaluationResultService.writeCsv(flowOf(slackMember))
                 .reduce { accumulator, value ->  accumulator + value}
-            val content = String(bytes, Charsets.UTF_8).split("\n")
-            assertThat(content[0].matches(csvHeader)).isEqualTo(true)
-            assertThat(content[1]).isEqualTo(csvRow)
+            val content = String(bytes, Charsets.UTF_8).trim().split("\n")
+            assertLinesMatch(listOf(csvHeader, csvRow), content)
         }
     }
 }
