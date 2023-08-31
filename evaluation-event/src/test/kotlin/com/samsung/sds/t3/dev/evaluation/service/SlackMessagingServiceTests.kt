@@ -3,6 +3,7 @@ package com.samsung.sds.t3.dev.evaluation.service
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.slack.api.Slack
 import com.slack.api.methods.request.auth.AuthTestRequest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 
+@ExperimentalCoroutinesApi
 class SlackMessagingServiceTests {
 
     private val slack = Slack.getInstance()

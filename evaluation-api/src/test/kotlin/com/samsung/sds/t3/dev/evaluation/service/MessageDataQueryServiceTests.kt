@@ -6,6 +6,7 @@ import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
@@ -18,6 +19,7 @@ import java.util.*
 
 private const val TEST = "test"
 
+@ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
 class MessageDataQueryServiceTests {
 

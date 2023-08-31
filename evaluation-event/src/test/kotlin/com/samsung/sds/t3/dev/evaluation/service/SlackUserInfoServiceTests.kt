@@ -2,12 +2,14 @@ package com.samsung.sds.t3.dev.evaluation.service
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.auth.AuthTestRequest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@ExperimentalCoroutinesApi
 class SlackUserInfoServiceTests {
     private val slack = Slack.getInstance()
     private val token = System.getenv("SLACK_BOT_TOKEN")

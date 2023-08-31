@@ -2,6 +2,7 @@ package com.samsung.sds.t3.dev.evaluation.repository
 
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -18,6 +19,7 @@ import java.time.LocalDateTime
 
 private const val TEST = "test"
 
+@ExperimentalCoroutinesApi
 @DataMongoTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension::class)
