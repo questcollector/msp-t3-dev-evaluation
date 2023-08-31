@@ -6,6 +6,7 @@ import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -16,6 +17,7 @@ import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.*
 
+@ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
 class MessageDataCommandServiceTests {
 
