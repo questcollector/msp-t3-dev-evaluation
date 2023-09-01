@@ -41,7 +41,7 @@ class SlackApiTests {
     fun `유저 이름 검색 테스트`() {
         val result = slack.methodsAsync(token).usersInfo(
             UsersInfoRequest.builder().user(userId).build()
-        ).whenComplete { t, u ->
+        ).whenComplete { t, _ ->
             println("users.info response: $t")
         }
 
@@ -63,7 +63,7 @@ class SlackApiTests {
                 .text("<@$userId> test message")
                 .mrkdwn(true)
                 .build()
-        ).whenCompleteAsync { t, u ->
+        ).whenCompleteAsync { t, _ ->
             println(t)
         }
 
