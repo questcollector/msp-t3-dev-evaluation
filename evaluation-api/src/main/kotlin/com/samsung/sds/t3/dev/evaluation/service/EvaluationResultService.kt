@@ -70,7 +70,7 @@ class EvaluationResultService(
     /**
      * 하나의 인스턴스에서 여러 개의 슬랙 아이디로 메시지를 처리한 경우
      */
-    suspend fun isCheated(instanceId: String): Boolean {
+    private suspend fun isCheated(instanceId: String): Boolean {
         val messages = messageDataRepository.findAllByInstanceId(instanceId)
 
         val slackUserIds = messages

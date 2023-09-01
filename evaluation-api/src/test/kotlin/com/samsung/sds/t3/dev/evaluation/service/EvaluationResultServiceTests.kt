@@ -20,6 +20,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.test.StepVerifier
 import java.time.LocalDateTime
+import kotlin.reflect.full.callSuspend
+import kotlin.reflect.full.declaredMemberFunctions
+import kotlin.reflect.jvm.isAccessible
 
 private const val TEST = "test"
 
@@ -180,7 +183,12 @@ class EvaluationResultServiceTests {
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
         runTest {
-            val result = evaluationResultService.isCheated("instanceId")
+            val isCheatedMethod = evaluationResultService::class.declaredMemberFunctions.find { it.name == "isCheated" }
+
+            val result = isCheatedMethod?.let {
+                it.isAccessible = true
+                it.callSuspend(evaluationResultService, "instanceId")
+            }
             assertThat(result).isEqualTo(false)
         }
     }
