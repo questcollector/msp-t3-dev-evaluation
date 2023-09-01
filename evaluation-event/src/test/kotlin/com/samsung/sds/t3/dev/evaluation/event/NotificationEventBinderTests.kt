@@ -1,7 +1,6 @@
 package com.samsung.sds.t3.dev.evaluation.event
 
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
-import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cloud.stream.binder.test.OutputDestination
@@ -18,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles
 @ExperimentalCoroutinesApi
 @ActiveProfiles("test")
 @SpringBootTest
-@EnableAutoConfiguration(exclude= [EmbeddedMongoAutoConfiguration::class])
 @ExtendWith(MockitoExtension::class)
 class NotificationEventBinderTests {
 

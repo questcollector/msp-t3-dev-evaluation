@@ -3,7 +3,6 @@ package com.samsung.sds.t3.dev.evaluation.event
 import com.samsung.sds.t3.dev.evaluation.model.CampaignDTO
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataCommandService
 import com.samsung.sds.t3.dev.evaluation.service.SlackMessagingService
-import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
@@ -13,7 +12,6 @@ import org.mockito.Mockito
 import org.mockito.Mockito.doAnswer
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -24,7 +22,6 @@ import org.springframework.test.context.ActiveProfiles
 @ExperimentalCoroutinesApi
 @ActiveProfiles("test")
 @SpringBootTest
-@EnableAutoConfiguration(exclude= [EmbeddedMongoAutoConfiguration::class])
 @ExtendWith(MockitoExtension::class)
 class CampaignAddedEventBinderTests {
     @Autowired
