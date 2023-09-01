@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
@@ -42,13 +41,13 @@ class SlackMessagingService (
                 .build()
         )
         return suspendCoroutine {
-            response.whenComplete { t, u ->
+            response.whenComplete { t, _ ->
                 if (t.isOk) {
                     log.info("Success postMessage")
                     it.resume(t)
                 } else {
                     log.info("Error on postMessage: ${t.error}")
-                    it.resumeWithException(u)
+                    it.resume(t)
                 }
             }
         }
