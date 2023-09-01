@@ -29,8 +29,8 @@ class MessageDataCommandService (
 
         val headers: MessageHeaders = messageDataDTO.headers
         val payload: CampaignDTO = messageDataDTO.payload
-        val slackUserName: String? = headers["SlackUserId"]?.run {
-            slackUserInfoService.getSlackUserNameWithSlackUserId(this as String)
+        val slackUserName: String? = headers["SlackUserId"]?.let {
+            slackUserInfoService.getSlackUserNameWithSlackUserId(it as String)
         }
 
         val sentDateTime: LocalDateTime? = headers.timestamp?.run {
