@@ -50,6 +50,15 @@ class MessageDataHandlerTests {
     }
 
     @Test
+    fun `없는 id값의 데이터 조회하기`() {
+        val sampleUUID = UUID.randomUUID().toString()
+
+        wtc.get().uri("/api/messageData/$sampleUUID")
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
     fun `특정 시간대 데이터 조회하기`() {
         val startDateQueryParam = "2023-02-22T18:15:17"
         val endDateQueryParam = "2023-02-23T18:15:17"

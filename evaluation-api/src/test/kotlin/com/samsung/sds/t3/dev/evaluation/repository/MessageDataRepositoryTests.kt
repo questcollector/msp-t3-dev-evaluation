@@ -44,6 +44,7 @@ class MessageDataRepositoryTests (
         entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
         entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
         entities.add(messageDataRepository.save(MessageDataEntity(id = SAMPLE_UUID, sentDateTime = NOW)))
+        entities.add(messageDataRepository.save(MessageDataEntity(instanceId = TEST)))
     }
 
     @AfterAll
@@ -65,5 +66,13 @@ class MessageDataRepositoryTests (
     fun `특정 uuid 데이터 조회`() = runTest {
         val result = messageDataRepository.findById(SAMPLE_UUID)
         assertThat(result).isEqualTo(entities[4])
+    }
+
+    @Test
+    fun `특정 instanceId의 데이터 조회`() = runTest {
+        val result = messageDataRepository.findAllByInstanceId(TEST)
+        StepVerifier.create(result.asFlux())
+            .expectNext(entities[5])
+            .verifyComplete()
     }
 }
