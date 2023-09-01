@@ -33,7 +33,7 @@ class CampaignAddedEventListener (
         }.subscribe()
     }
 
-    suspend fun handleMessage(message: Message<CampaignDTO>) {
+    private suspend fun handleMessage(message: Message<CampaignDTO>) {
 
         val entity = messageDataCommandService.createMessageDataEntity(message)
 

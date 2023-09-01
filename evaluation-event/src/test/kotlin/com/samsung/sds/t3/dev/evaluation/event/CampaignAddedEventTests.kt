@@ -1,6 +1,7 @@
 package com.samsung.sds.t3.dev.evaluation.event
 
 import com.samsung.sds.t3.dev.evaluation.model.CampaignDTO
+import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataCommandService
 import com.samsung.sds.t3.dev.evaluation.service.SlackMessagingService
 import io.mockk.coEvery
@@ -40,12 +41,13 @@ class CampaignAddedEventTests {
             notificationEventPublisher
         ))
 
-        coEvery { campaignAddedEventListener.handleMessage(any()) } coAnswers {
+        coEvery { messageDataCommandService.createMessageDataEntity(any()) } coAnswers {
             println("handleMessage invoked")
             val argumentMessage = this.arg<GenericMessage<CampaignDTO>>(0)
             assertThat(argumentMessage.payload)
                 .matches { it.campaignId in 1 ..< 3 }
                 .matches { it.campaignName in listOf("name1", "name2", "name3") }
+            MessageDataEntity(isPass = false, payload = argumentMessage.payload.toString())
         }
 
         campaignAddedEventListener.campaignAddedEvent().accept(campaigns)
