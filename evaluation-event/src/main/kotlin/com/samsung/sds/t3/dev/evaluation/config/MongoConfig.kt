@@ -8,4 +8,4 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @Profile("prod")
 @Configuration
 @EnableReactiveMongoRepositories(basePackages = ["com.samsung.sds.t3.dev.evaluation.repository"])
-class MongoConfig { }
+class MongoConfig

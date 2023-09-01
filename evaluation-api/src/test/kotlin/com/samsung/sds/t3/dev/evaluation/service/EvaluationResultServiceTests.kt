@@ -37,7 +37,7 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `startDate, endDate 지정하지 않은 상태`() {
-        val entities = flow<MessageDataEntity> {
+        val entities = flow {
             emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY.minusDays(1), isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
@@ -58,7 +58,7 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `startDate, endDate 지정한 경우`() {
-        val entities = flow<MessageDataEntity> {
+        val entities = flow {
             emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
@@ -79,7 +79,7 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `통과한 데이터 없는 경우`() {
-        val entities = flow<MessageDataEntity> {
+        val entities = flow {
             emit(MessageDataEntity(sentDateTime = TODAY, instanceId = "instanceId", ipAddress = "ipaddress"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, instanceId = "instanceId", ipAddress = "ipaddress"))
         }
@@ -113,7 +113,7 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `instanceId가 다른 경우`() {
-        val entities = flow<MessageDataEntity> {
+        val entities = flow {
             emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId2", ipAddress = "ipaddress"))
         }
@@ -133,7 +133,7 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `ipAddress가 다른 경우`() {
-        val entities = flow<MessageDataEntity> {
+        val entities = flow {
             emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress2"))
         }
@@ -153,7 +153,7 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `하나의 인스턴스에서 여러 사람의 메시지가 보내진 경우`() {
-        val entities = flow<MessageDataEntity> {
+        val entities = flow {
             emit(MessageDataEntity(sentDateTime = TODAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "user1"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "user2"))
         }
@@ -174,7 +174,7 @@ class EvaluationResultServiceTests {
 
     @Test
     fun `slack id 잘못 입력했을 경우 isCheated 값은 false`() {
-        val entities = flow<MessageDataEntity> {
+        val entities = flow {
             emit(MessageDataEntity(sentDateTime = TODAY, isPass = false, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "<<user>>"))
             emit(MessageDataEntity(sentDateTime = YESTERDAY, isPass = true, instanceId = "instanceId", ipAddress = "ipaddress", slackUserId = "user"))
         }
@@ -196,7 +196,7 @@ class EvaluationResultServiceTests {
     @FlowPreview
     @Test
     fun `csv ByteArray를 SlackMemberVO로 변환`() {
-        val csv = flow<ByteArray> {
+        val csv = flow {
             emit("username,email,status,billing-active,has-2fa,has-sso,userid,fullname,displayname,expiration-timestamp\n".toByteArray())
             emit("miroirs01,miroirs01@gmail.com,Member,1,1,0,U059H0Z4PH6,\"실습보조강사 유기영\"".toByteArray())
             emit(",\"실습보조강사 유기영\",\n".toByteArray())

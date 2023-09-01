@@ -53,7 +53,7 @@ class CampaignAddedEventListener (
     fun errorHandler() : Consumer<Flux<ErrorMessage>> = Consumer { message ->
         message.log()
             .subscribe {
-                log.info("error occured: \n$it")
+                log.info("error occurred: \n$it")
             }
     }
 }

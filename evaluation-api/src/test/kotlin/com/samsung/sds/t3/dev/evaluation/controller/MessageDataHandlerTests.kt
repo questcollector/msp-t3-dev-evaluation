@@ -67,7 +67,7 @@ class MessageDataHandlerTests {
         val startDate = LocalDateTime.parse(startDateQueryParam)
         val endDate = LocalDateTime.parse(endDateQueryParam)
 
-        val messageDTOList = listOf<MessageDataDTO>(
+        val messageDTOList = listOf(
             MessageDataDTO(sentDateTime = TODAY.minusHours(1)),
             MessageDataDTO(sentDateTime = YESTERDAY))
         messageDTOList.forEach { println(it) }
@@ -108,7 +108,7 @@ class MessageDataHandlerTests {
 
     @Test
     fun `특정 유저의 데이터 조회`() {
-        val messageDTOList = listOf<MessageDataDTO>(
+        val messageDTOList = listOf(
             MessageDataDTO(slackUserName = "test"),
             MessageDataDTO(slackUserName = "test"))
         messageDTOList.forEach { println(it) }
@@ -129,7 +129,7 @@ class MessageDataHandlerTests {
 
     @Test
     fun `특정 인스턴스에서 보내진 모든 메시지 조회`() {
-        val messageDTOList = listOf<MessageDataDTO>(
+        val messageDTOList = listOf(
             MessageDataDTO(instanceId = "test"),
             MessageDataDTO(instanceId = "test"))
         messageDTOList.forEach { println(it) }

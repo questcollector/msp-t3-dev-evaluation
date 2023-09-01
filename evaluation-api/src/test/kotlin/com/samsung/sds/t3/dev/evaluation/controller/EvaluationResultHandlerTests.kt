@@ -42,14 +42,14 @@ class EvaluationResultHandlerTests {
     private lateinit var wtc: WebTestClient
 
     @Test
-    fun `slackuserid 안보냈을 경우`() {
+    fun `slackUserId 안 보냈을 경우`() {
         wtc.get().uri("/api/evaluation/slackUserId/")
             .exchange()
             .expectStatus().isNotFound
     }
 
     @Test
-    fun `startDate, endDate 안보냈을 경우`() {
+    fun `startDate, endDate 안 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
         runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(

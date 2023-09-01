@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @OpenAPIDefinition(
-    servers = arrayOf(Server(url = "/"))
+    servers = [Server(url = "/")]
 )
 class OpenApiConfig {
     @Bean

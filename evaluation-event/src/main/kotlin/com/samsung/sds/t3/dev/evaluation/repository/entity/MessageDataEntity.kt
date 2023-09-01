@@ -17,4 +17,4 @@ data class MessageDataEntity (
     val slackUserName: String? = null,
     val payload: String? = null,
     val isPass: Boolean = false
-) { }
+)

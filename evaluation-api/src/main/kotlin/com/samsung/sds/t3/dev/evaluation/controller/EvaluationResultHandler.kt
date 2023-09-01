@@ -79,7 +79,7 @@ fun String?.parseLocalDateTimeWithDefaultValue(default: LocalDateTime): LocalDat
         try {
             result = LocalDateTime.parse(this)
         } catch (e : DateTimeParseException) {
-            println("datetime parse error: ${this}")
+            println("datetime parse error: $this")
         }
     }
     return result
