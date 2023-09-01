@@ -4,6 +4,7 @@ import com.samsung.sds.t3.dev.evaluation.config.EvaluationResultRouter
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
@@ -30,6 +31,7 @@ private const val OK = "OK"
 
 private const val TEST = "test"
 
+@ExperimentalCoroutinesApi
 @WebFluxTest(EvaluationResultHandler::class)
 @ActiveProfiles(TEST)
 @AutoConfigureWebTestClient
