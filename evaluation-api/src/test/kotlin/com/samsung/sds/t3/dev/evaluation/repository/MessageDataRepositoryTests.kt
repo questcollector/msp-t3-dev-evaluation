@@ -1,5 +1,9 @@
 package com.samsung.sds.t3.dev.evaluation.repository
 
+import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.NOW
+import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.SAMPLE_UUID
+import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.TODAY
+import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.YESTERDAY
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.reactor.asFlux
@@ -30,10 +34,12 @@ class MessageDataRepositoryTests (
     private val messageDataRepository: MessageDataRepository
 ) {
 
-    private val NOW = LocalDateTime.now().withNano(0)
-    private val TODAY = LocalDateTime.parse("2023-02-22T23:57:06.578")
-    private val YESTERDAY = TODAY.minusDays(1)
-    private val SAMPLE_UUID = UUID.randomUUID()
+    private object Constant {
+        val NOW: LocalDateTime = LocalDateTime.now().withNano(0)
+        val TODAY: LocalDateTime = LocalDateTime.parse("2023-02-22T23:57:06.578")
+        val YESTERDAY: LocalDateTime = TODAY.minusDays(1)
+        val SAMPLE_UUID: UUID = UUID.randomUUID()
+    }
     private val entities : MutableList<MessageDataEntity> =
         mutableListOf()
 

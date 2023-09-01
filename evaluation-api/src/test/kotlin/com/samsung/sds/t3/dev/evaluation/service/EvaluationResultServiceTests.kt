@@ -4,6 +4,8 @@ import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
+import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultServiceTests.Constant.TODAY
+import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultServiceTests.Constant.YESTERDAY
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
@@ -32,8 +34,10 @@ class EvaluationResultServiceTests {
 
     private val messageDataRepository = mockk<MessageDataRepository>()
 
-    private val TODAY = LocalDateTime.now()
-    private val YESTERDAY = TODAY.minusDays(1)
+    private object Constant {
+        val TODAY: LocalDateTime = LocalDateTime.now()
+        val YESTERDAY: LocalDateTime = TODAY.minusDays(1)
+    }
 
     @Test
     fun `startDate, endDate 지정하지 않은 상태`() {

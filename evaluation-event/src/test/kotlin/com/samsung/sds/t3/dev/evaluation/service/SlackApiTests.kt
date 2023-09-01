@@ -8,15 +8,17 @@ import com.slack.api.methods.request.users.UsersInfoRequest
 import com.slack.api.model.ConversationType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SlackApiTests {
     private val slack = Slack.getInstance()
     private val token = System.getenv("SLACK_BOT_TOKEN")
     private val userId = System.getenv("SLACK_USER_ID")
 
-    @BeforeEach
+    @BeforeAll
     fun `토큰이 있는지 점검`() {
         assumeTrue(token != null)
         assumeTrue(userId != null)

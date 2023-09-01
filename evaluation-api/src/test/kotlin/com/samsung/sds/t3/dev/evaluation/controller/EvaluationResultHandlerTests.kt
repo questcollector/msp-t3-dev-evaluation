@@ -144,7 +144,7 @@ class EvaluationResultHandlerTests {
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         // 최종 csv 형태의 Flow<ByteArray>
-        val csv = flow<ByteArray> {
+        val csv = flow {
             emit("userid,fullname,displayname,result_${now}\n".toByteArray())
             emitAll(slackMembers.map {
                 "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray()

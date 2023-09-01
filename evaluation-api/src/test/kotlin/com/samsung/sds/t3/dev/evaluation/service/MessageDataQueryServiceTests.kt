@@ -3,6 +3,11 @@ package com.samsung.sds.t3.dev.evaluation.service
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepository
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.samsung.sds.t3.dev.evaluation.repository.entity.toMessageDataDTO
+import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryServiceTests.Constant.NOW
+import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryServiceTests.Constant.SAMPLE_UUID1
+import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryServiceTests.Constant.SAMPLE_UUID2
+import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryServiceTests.Constant.TODAY
+import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryServiceTests.Constant.YESTERDAY
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
@@ -29,11 +34,13 @@ class MessageDataQueryServiceTests {
 
     private val messageDataRepository = mockk<MessageDataRepository>()
 
-    private val NOW = LocalDateTime.now().withNano(0)
-    private val TODAY = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
-    private val YESTERDAY = TODAY.minusDays(1)
-    private val SAMPLE_UUID1 = UUID.randomUUID()
-    private val SAMPLE_UUID2 = UUID.randomUUID()
+    private object Constant {
+        val NOW: LocalDateTime = LocalDateTime.now().withNano(0)
+        val TODAY: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
+        val YESTERDAY: LocalDateTime = TODAY.minusDays(1)
+        val SAMPLE_UUID1: UUID = UUID.randomUUID()
+        val SAMPLE_UUID2: UUID = UUID.randomUUID()
+    }
 
     @Test
     fun `특정 기간 동안 모든 메시지 조회`() {

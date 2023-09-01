@@ -1,6 +1,8 @@
 package com.samsung.sds.t3.dev.evaluation.controller
 
 import com.samsung.sds.t3.dev.evaluation.config.MessageDataRouter
+import com.samsung.sds.t3.dev.evaluation.controller.MessageDataHandlerTests.Constant.TODAY
+import com.samsung.sds.t3.dev.evaluation.controller.MessageDataHandlerTests.Constant.YESTERDAY
 import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,8 +34,10 @@ class MessageDataHandlerTests {
     @Autowired
     private lateinit var wtc: WebTestClient
 
-    private val TODAY = OffsetDateTime.parse("2023-02-23T18:15:17+09:00")
-    private val YESTERDAY = TODAY.minusDays(1)
+    private object Constant {
+        val TODAY: OffsetDateTime = OffsetDateTime.parse("2023-02-23T18:15:17+09:00")
+        val YESTERDAY: OffsetDateTime = TODAY.minusDays(1)
+    }
     @Test
     @FlowPreview
     fun `uuid로 1건 조회하기`() {
