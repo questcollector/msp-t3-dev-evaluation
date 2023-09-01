@@ -46,6 +46,7 @@ class SlackMessagingService (
                     log.info("Success postMessage")
                     it.resume(t)
                 } else {
+                    // slack api 내부적 원인으로 실패
                     log.info("Error on postMessage: ${t.error}")
                     it.resume(t)
                 }
