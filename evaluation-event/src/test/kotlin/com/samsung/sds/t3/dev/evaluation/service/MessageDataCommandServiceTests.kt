@@ -16,6 +16,8 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.reflect.full.declaredMemberFunctions
+import kotlin.reflect.jvm.isAccessible
 
 @ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
@@ -87,14 +89,13 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        val calculateIsPass = messageDataCommandService.javaClass.getDeclaredMethod("calculateIsPass",
-            MessageHeaders::class.java, String::class.java
-        )
-        calculateIsPass.trySetAccessible()
-
-        
         runTest {
-            val result = calculateIsPass.invoke(messageDataCommandService, message.headers, "test") as Boolean
+            val calculateIsPassMethod = messageDataCommandService::class.declaredMemberFunctions
+                .find { it.name == "calculateIsPass" }
+            val result = calculateIsPassMethod?.let {
+                it.isAccessible = true
+                it.call(messageDataCommandService, message.headers, "test") as Boolean
+            }
             assertThat(result).isTrue
         }
     }
@@ -113,14 +114,13 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        val calculateIsPass = messageDataCommandService.javaClass.getDeclaredMethod("calculateIsPass",
-            MessageHeaders::class.java, String::class.java
-        )
-        calculateIsPass.trySetAccessible()
-
-
         runTest {
-            val result = calculateIsPass.invoke(messageDataCommandService, message.headers, "test") as Boolean
+            val calculateIsPassMethod = messageDataCommandService::class.declaredMemberFunctions
+                .find { it.name == "calculateIsPass" }
+            val result = calculateIsPassMethod?.let {
+                it.isAccessible = true
+                it.call(messageDataCommandService, message.headers, "test") as Boolean
+            }
             assertThat(result).isFalse
         }
     }
@@ -139,14 +139,13 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        val calculateIsPass = messageDataCommandService.javaClass.getDeclaredMethod("calculateIsPass",
-            MessageHeaders::class.java, String::class.java
-        )
-        calculateIsPass.trySetAccessible()
-
-
         runTest {
-            val result = calculateIsPass.invoke(messageDataCommandService, message.headers, "test") as Boolean
+            val calculateIsPassMethod = messageDataCommandService::class.declaredMemberFunctions
+                .find { it.name == "calculateIsPass" }
+            val result = calculateIsPassMethod?.let {
+                it.isAccessible = true
+                it.call(messageDataCommandService, message.headers, "test") as Boolean
+            }
             assertThat(result).isFalse
         }
     }
