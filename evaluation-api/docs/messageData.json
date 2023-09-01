@@ -6,8 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8085",
-      "description": "Generated server url"
+      "url": "/"
     }
   ],
   "tags": [
@@ -21,18 +20,74 @@
     }
   ],
   "paths": {
-    "/api/evaluation/slackUserName/": {
+    "/api/evaluation/overall/": {
+      "post": {
+        "tags": [
+          "Evaluation"
+        ],
+        "description": "experimental",
+        "operationId": "getEvaluationResultAsFile",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "start LocalDateTime 2023-03-06T00:00:00, included"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "end LocalDateTime 2023-03-06T00:00:00, excluded"
+          }
+        ],
+        "requestBody": {
+          "description": "수강생 명단 목록 csv 파일",
+          "content": {
+            "text/csv": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/evaluation/slackUserId/": {
       "get": {
         "tags": [
           "Evaluation"
         ],
-        "operationId": "getEvaluationResultBySlackUserName",
+        "operationId": "getEvaluationResultBySlackUserId",
         "parameters": [
           {
-            "name": "slackUserName",
+            "name": "slackUserId",
             "in": "query",
-            "description": "slack member Name like 홍길동",
+            "description": "slack member id like UXXXXXXXXXX",
             "required": true
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "start LocalDateTime 2023-03-06T00:00:00, included"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "end LocalDateTime 2023-03-06T00:00:00, excluded"
           }
         ],
         "responses": {
@@ -59,12 +114,12 @@
           {
             "name": "startDate",
             "in": "query",
-            "description": "start LocalDateTime 2023-03-06T00:00:00"
+            "description": "start LocalDateTime 2023-03-06T00:00:00, excluded"
           },
           {
             "name": "endDate",
             "in": "query",
-            "description": "end LocalDateTime 2023-03-06T00:00:00"
+            "description": "end LocalDateTime 2023-03-06T00:00:00, excluded"
           }
         ],
         "responses": {
@@ -84,6 +139,34 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/messageData/instanceId/{instanceId}": {
+      "get": {
+        "tags": [
+          "MessageData"
+        ],
+        "operationId": "getMessageDataListByInstanceId",
+        "parameters": [
+          {
+            "name": "instanceId",
+            "in": "path",
+            "description": "instance id like i-xxxxxxxxxxxxxxxxx",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDataDTO"
                 }
               }
             }
@@ -119,7 +202,7 @@
         }
       }
     },
-    "/api/messageData/uuid/{uuid}": {
+    "/api/messageData/{uuid}": {
       "get": {
         "tags": [
           "MessageData"
@@ -163,6 +246,7 @@
       "EvaluationResultDTO": {
         "required": [
           "data",
+          "reason",
           "result"
         ],
         "type": "object",
@@ -203,10 +287,10 @@
             "format": "date-time",
             "example": "2022-05-18T05:01:43+09:00"
           },
-          "hostname": {
+          "instanceId": {
             "type": "string",
-            "description": "hostname that a message came from",
-            "example": "EC2XXXX-XXXXXXX"
+            "description": "instanceId that a message came from",
+            "example": "i-xxxxxxxxxxxxxxxxx"
           },
           "ipAddress": {
             "type": "string",
