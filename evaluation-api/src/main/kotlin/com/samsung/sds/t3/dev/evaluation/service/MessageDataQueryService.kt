@@ -30,30 +30,27 @@ class MessageDataQueryService(
 
         val messageDataEntities = messageDataRepository.findAll()
 
-        return messageDataEntities.flowOn(Dispatchers.IO)
+        return messageDataEntities
             .filterNotNull()
             .filter { it.sentDateTime in (start..< end) }
-            .map { entity -> entity.toMessageDataDTO() }
+            .map { it.toMessageDataDTO() }
+            .flowOn(Dispatchers.IO)
     }
 
     fun getMessageDataWithSlackUserName(slackUserName: String): Flow<MessageDataDTO> {
         log.info("getMessageDataWithSlackUserName invoked")
         val messageDataEntities = messageDataRepository.findAllBySlackUserNameStartsWith(slackUserName)
 
-        return messageDataEntities.flowOn(Dispatchers.IO)
-            .mapNotNull { entity ->
-                entity.toMessageDataDTO()
-            }
+        return messageDataEntities
+            .mapNotNull { it.toMessageDataDTO() }.flowOn(Dispatchers.IO)
     }
 
     fun getMessageDataWithInstanceId(instanceId: String): Flow<MessageDataDTO> {
         log.info("getMessageDataWithInstanceId invoked")
         val messageDataEntities = messageDataRepository.findAllByInstanceId(instanceId)
 
-        return messageDataEntities.flowOn(Dispatchers.IO)
-            .mapNotNull { entity ->
-                entity.toMessageDataDTO()
-            }
+        return messageDataEntities
+            .mapNotNull { it.toMessageDataDTO() }.flowOn(Dispatchers.IO)
     }
 
     suspend fun getMessageDataByMessageUuid(messageId: String): MessageDataDTO? {
