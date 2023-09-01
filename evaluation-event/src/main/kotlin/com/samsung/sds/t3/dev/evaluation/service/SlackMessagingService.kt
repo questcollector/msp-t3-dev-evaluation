@@ -55,7 +55,7 @@ class SlackMessagingService (
     }
 
     @Cacheable(cacheNames = ["directChannels"], key = "#slackUserId")
-    suspend fun getDirectChannel(slackUserId : String) : ConversationsOpenResponse {
+    private suspend fun getDirectChannel(slackUserId : String) : ConversationsOpenResponse {
 
         log.info("getDirectChannel invoked")
 
