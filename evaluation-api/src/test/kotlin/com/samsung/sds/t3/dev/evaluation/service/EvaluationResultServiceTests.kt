@@ -11,11 +11,14 @@ import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertLinesMatch
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import reactor.test.StepVerifier
 import java.time.LocalDateTime
 
 private const val TEST = "test"
@@ -202,7 +205,11 @@ class EvaluationResultServiceTests {
 
         runTest {
             val slackMembers = evaluationResultService.readCsv(csv)
-            assertThat(slackMembers.first()).isEqualTo(slackMember)
+
+            StepVerifier.create(slackMembers.asFlux())
+                .expectNext(slackMember)
+                .verifyComplete()
+//            assertThat(slackMembers.first()).isEqualTo(slackMember)
         }
     }
 
@@ -224,7 +231,11 @@ class EvaluationResultServiceTests {
 
         runTest {
             val slackMembers = evaluationResultService.getResults(flowOf(slackMember), LocalDateTime.MIN, LocalDateTime.MAX)
-            assertThat(slackMembers.first().result).isEqualTo("OK")
+            StepVerifier.create(slackMembers.asFlux())
+                .assertNext {
+                    assertEquals(it.result, "OK")
+                }.verifyComplete()
+//            assertThat(slackMembers.first().result).isEqualTo("OK")
         }
     }
 
@@ -242,14 +253,17 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?"
-        val csvRow = "${slackMember.userId},\"${slackMember.fullname}\",\"${slackMember.displayname}\",${slackMember.result}"
+        val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?\n"
+        val csvRow = "${slackMember.userId},\"${slackMember.fullname}\",\"${slackMember.displayname}\",${slackMember.result}\n"
 
         runTest {
             val bytes = evaluationResultService.writeCsv(flowOf(slackMember))
-                .reduce { accumulator, value ->  accumulator + value}
-            val content = String(bytes, Charsets.UTF_8).trim().split("\n")
-            assertLinesMatch(listOf(csvHeader, csvRow), content)
+            StepVerifier.create(bytes.map { String(it, Charsets.UTF_8) }.asFlux())
+                .assertNext {
+                    assertTrue(it.matches(csvHeader.toRegex()))
+                }.assertNext {
+                    assertEquals(it, csvRow)
+                }.verifyComplete()
         }
     }
 }
