@@ -70,13 +70,13 @@ class EvaluationResultService(
     /**
      * 하나의 인스턴스에서 여러 개의 슬랙 아이디로 메시지를 처리한 경우
      */
-    suspend fun isCheated(instanceId: String): Boolean {
+    private suspend fun isCheated(instanceId: String): Boolean {
         val messages = messageDataRepository.findAllByInstanceId(instanceId)
 
-        val slackUserIds = messages.flowOn(Dispatchers.IO)
+        val slackUserIds = messages
             .filter { it.isPass }
             .mapNotNull { it.slackUserId }
-            .filterNotNull().toSet()
+            .filterNotNull().flowOn(Dispatchers.IO).toSet()
 
         return slackUserIds.count() > 1
     }
@@ -85,7 +85,7 @@ class EvaluationResultService(
     fun readCsv(data: Flow<ByteArray>): Flow<SlackMemberVO> {
         log.info("readCsv invoked")
 
-        // line이 잘렸을 때 앞 부분을 임시로 저장하는 변수
+        // line이 잘렸을 때 앞 부분을 임시로 저장하는 channel
         val remainingBytesChannel = Channel<ByteArray>(Channel.CONFLATED)
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -93,26 +93,25 @@ class EvaluationResultService(
             remainingBytesChannel.send(ByteArray(0))
         }
 
-        return data.flowOn(Dispatchers.IO)
+        return data
             // ByteArray -> String(line)
             .flatMapConcat { bytes ->
-                produceStringLineFromBytes(remainingBytesChannel, bytes)
-            }.buffer()
+                remainingBytesChannel.produceStringLineFromBytes(bytes)
+            }
+            .buffer()
             // 헤더 부분 제외
             .filter { !(it.startsWith("username,")) }
             // String row를 SlackMemberVO로 변환
             .map(::convertRowToSlackMemberVO)
             // Member(수강생 계정)와 활성화된 계정만 필터링
             .filter { (it.status == "Member" && it.billingActive == 1) }
+            .flowOn(Dispatchers.IO)
     }
 
-    private fun produceStringLineFromBytes(
-        remainingBytesChannel: Channel<ByteArray>,
-        bytes: ByteArray
-    ) = flow {
+    private fun Channel<ByteArray>.produceStringLineFromBytes(bytes: ByteArray) = flow {
 
         // flow로 넘어온 ByteArray와 remainingBytes 합치기
-        val remainingBytes = remainingBytesChannel.receive()
+        val remainingBytes = receive()
         val combinedData = remainingBytes + bytes
         val rawData = combinedData.toString(Charsets.UTF_8)
 
@@ -122,7 +121,7 @@ class EvaluationResultService(
             when (char) {
                 '\n' -> {
                     // 데이터 완결 시 바로 publish
-                    emit(line.toString())
+                    this.emit(line.toString())
                     line.clear()
                 }
 
@@ -135,8 +134,8 @@ class EvaluationResultService(
         }
 
         // 남은 라인을 채널에 저장
-        remainingBytesChannel.send(line.toString().toByteArray(Charsets.UTF_8))
-    }
+        send(line.toString().toByteArray(Charsets.UTF_8))
+    }.flowOn(Dispatchers.IO)
 
     private fun convertRowToSlackMemberVO(row: String): SlackMemberVO {
 
@@ -170,13 +169,13 @@ class EvaluationResultService(
 
         log.info("getResults invoked")
 
-        return slackMembers.flowOn(Dispatchers.IO)
+        return slackMembers
             .map {
                 val result = this.getEvaluationResultBySlackUserId(it.userId, startDateTime, endDateTime)
                 it.result = result.reason
 
                 return@map it
-            }
+            }.flowOn(Dispatchers.IO)
     }
 
     @FlowPreview
@@ -192,7 +191,6 @@ class EvaluationResultService(
                 "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray()
             }
 
-        return flowOf(header, rows).flowOn(Dispatchers.IO)
-            .flattenConcat()
+        return flowOf(header, rows).flattenConcat().flowOn(Dispatchers.IO)
     }
 }

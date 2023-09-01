@@ -3,20 +3,28 @@ package com.samsung.sds.t3.dev.evaluation.service
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.slack.api.Slack
 import com.slack.api.methods.request.auth.AuthTestRequest
+import com.slack.api.methods.response.conversations.ConversationsOpenResponse
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.util.*
+import kotlin.reflect.full.callSuspend
+import kotlin.reflect.full.declaredMemberFunctions
+import kotlin.reflect.jvm.isAccessible
 
+@ExperimentalCoroutinesApi
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SlackMessagingServiceTests {
 
     private val slack = Slack.getInstance()
     private val token = System.getenv("SLACK_BOT_TOKEN")
     private val userId = System.getenv("SLACK_USER_ID")
-    @BeforeEach
+    @BeforeAll
     fun `슬랙 테스트 사전점검`() {
         assumeTrue(token != null)
         assumeTrue(userId != null)
@@ -42,10 +50,13 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         runTest {
-            val directChannel = slackMessagingService.getDirectChannel(userId)
-
-            println(directChannel)
-            assertThat(directChannel.channel.user).isEqualTo(userId)
+            val getDirectChannelMethod = slackMessagingService::class.declaredMemberFunctions
+                .find{ it.name == "getDirectChannel" }
+            getDirectChannelMethod?.let {
+                it.isAccessible = true
+                val result = it.callSuspend(slackMessagingService, userId) as ConversationsOpenResponse
+                assertThat(result.channel.user).isEqualTo(userId)
+            }
         }
     }
 
@@ -55,10 +66,13 @@ class SlackMessagingServiceTests {
         slackMessagingService.slackToken = token
 
         runTest {
-            
-            val directChannel = slackMessagingService.getDirectChannel("<<SLACK_USER_ID>>")
-            assertThat(directChannel.error).isEqualTo("user_not_found")
-            
+            val getDirectChannelMethod = slackMessagingService::class.declaredMemberFunctions
+                .find{ it.name == "getDirectChannel" }
+            getDirectChannelMethod?.let {
+                it.isAccessible = true
+                val result = it.callSuspend(slackMessagingService, "<<SLACK_USER_ID>>") as ConversationsOpenResponse
+                assertThat(result.error).isEqualTo("user_not_found")
+            }
         }
     }
 

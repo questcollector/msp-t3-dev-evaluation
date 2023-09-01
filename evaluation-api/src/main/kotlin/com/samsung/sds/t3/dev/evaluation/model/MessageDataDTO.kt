@@ -113,4 +113,4 @@ data class MessageDataDTO (
     )
     @JsonProperty("isPass")
     val isPass: Boolean = false
-) {}
+)

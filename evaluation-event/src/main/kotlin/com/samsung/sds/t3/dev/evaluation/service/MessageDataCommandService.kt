@@ -29,8 +29,8 @@ class MessageDataCommandService (
 
         val headers: MessageHeaders = messageDataDTO.headers
         val payload: CampaignDTO = messageDataDTO.payload
-        val slackUserName: String? = headers["SlackUserId"]?.run {
-            slackUserInfoService.getSlackUserNameWithSlackUserId(this as String)
+        val slackUserName: String? = headers["SlackUserId"]?.let {
+            slackUserInfoService.getSlackUserNameWithSlackUserId(it as String)
         }
 
         val sentDateTime: LocalDateTime? = headers.timestamp?.run {
@@ -43,22 +43,19 @@ class MessageDataCommandService (
             )
         }
 
-        val isPass: Boolean = calculateIsPass(headers, slackUserName)
-
-        return MessageDataEntity(
-            UUID.randomUUID(),
-            sentDateTime?: LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
-            headers["InstanceId"] as? String,
-            headers["IpAddress"] as? String,
-            headers["SlackUserId"] as? String,
-            slackUserName,
-            payload.toString(),
-            isPass
+        val messageEntity = MessageDataEntity(
+            id = UUID.randomUUID(),
+            sentDateTime = sentDateTime?: LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
+            instanceId = headers["InstanceId"] as? String,
+            ipAddress = headers["IpAddress"] as? String,
+            slackUserId = headers["SlackUserId"] as? String,
+            slackUserName = slackUserName,
+            payload = payload.toString(),
+            isPass = calculateIsPass(headers, slackUserName)
         )
-    }
 
-    suspend fun saveMessageDataEntity(messageDataEntity: MessageDataEntity) =
-        messageDataRepository.save(messageDataEntity)
+        return messageDataRepository.save(messageEntity)
+    }
 
     private fun calculateIsPass(headers: MessageHeaders,
                                 slackUserName: String?): Boolean {

@@ -20,6 +20,7 @@ class MessageDataHandler(
 
     suspend fun getMessageDataByMessageUuid(request: ServerRequest): ServerResponse {
         val uuid = request.pathVariable("uuid")
+        log.info("requested endpoint: /api/messageData/$uuid")
         val result = messageDataQueryService.getMessageDataByMessageUuid(uuid)
 
         return if (result == null)
@@ -32,6 +33,7 @@ class MessageDataHandler(
     suspend fun getMessageDataList(request: ServerRequest): ServerResponse {
         val startDate = request.queryParamOrNull("startDate")
         val endDate = request.queryParamOrNull("endDate")
+        log.info("requested endpoint: /api/messageData/?startDate=$startDate&endDate=$endDate")
         var startDateTime: LocalDateTime? = null
         var endDateTime: LocalDateTime? = null
 
@@ -53,6 +55,7 @@ class MessageDataHandler(
     @FlowPreview
     suspend fun getMessageDataListBySlackUserName(request: ServerRequest) : ServerResponse {
         val slackUserName = request.pathVariable("slackUserName")
+        log.info("requested endpoint: /api/messageData/slackUserName/$slackUserName")
         val result =  messageDataQueryService.getMessageDataWithSlackUserName(slackUserName)
         return ServerResponse.ok().json().bodyAndAwait(result)
     }
@@ -60,6 +63,7 @@ class MessageDataHandler(
     @FlowPreview
     suspend fun getMessageDataListByInstanceId(request: ServerRequest) : ServerResponse {
         val instanceId = request.pathVariable("instanceId")
+        log.info("requested endpoint: /api/messageData/instanceId/$instanceId")
         val result = messageDataQueryService.getMessageDataWithInstanceId(instanceId)
         return ServerResponse.ok().json().bodyAndAwait(result)
     }

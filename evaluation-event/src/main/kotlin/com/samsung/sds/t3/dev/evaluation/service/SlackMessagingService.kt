@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
@@ -42,20 +41,21 @@ class SlackMessagingService (
                 .build()
         )
         return suspendCoroutine {
-            response.whenComplete { t, u ->
+            response.whenComplete { t, _ ->
                 if (t.isOk) {
                     log.info("Success postMessage")
                     it.resume(t)
                 } else {
+                    // slack api 내부적 원인으로 실패
                     log.info("Error on postMessage: ${t.error}")
-                    it.resumeWithException(u)
+                    it.resume(t)
                 }
             }
         }
     }
 
     @Cacheable(cacheNames = ["directChannels"], key = "#slackUserId")
-    suspend fun getDirectChannel(slackUserId : String) : ConversationsOpenResponse {
+    private suspend fun getDirectChannel(slackUserId : String) : ConversationsOpenResponse {
 
         log.info("getDirectChannel invoked")
 

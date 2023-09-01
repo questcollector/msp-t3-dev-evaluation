@@ -4,6 +4,7 @@ import com.samsung.sds.t3.dev.evaluation.config.EvaluationResultRouter
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
@@ -30,6 +31,7 @@ private const val OK = "OK"
 
 private const val TEST = "test"
 
+@ExperimentalCoroutinesApi
 @WebFluxTest(EvaluationResultHandler::class)
 @ActiveProfiles(TEST)
 @AutoConfigureWebTestClient
@@ -42,14 +44,14 @@ class EvaluationResultHandlerTests {
     private lateinit var wtc: WebTestClient
 
     @Test
-    fun `slackuserid 안보냈을 경우`() {
+    fun `slackUserId 안 보냈을 경우`() {
         wtc.get().uri("/api/evaluation/slackUserId/")
             .exchange()
             .expectStatus().isNotFound
     }
 
     @Test
-    fun `startDate, endDate 안보냈을 경우`() {
+    fun `startDate, endDate 안 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
         runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
@@ -142,7 +144,7 @@ class EvaluationResultHandlerTests {
         val now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         // 최종 csv 형태의 Flow<ByteArray>
-        val csv = flow<ByteArray> {
+        val csv = flow {
             emit("userid,fullname,displayname,result_${now}\n".toByteArray())
             emitAll(slackMembers.map {
                 "${it.userId},\"${it.fullname}\",\"${it.displayname}\",${it.result}\n".toByteArray()

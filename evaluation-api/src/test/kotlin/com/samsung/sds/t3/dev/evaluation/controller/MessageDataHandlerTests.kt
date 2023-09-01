@@ -1,8 +1,11 @@
 package com.samsung.sds.t3.dev.evaluation.controller
 
 import com.samsung.sds.t3.dev.evaluation.config.MessageDataRouter
+import com.samsung.sds.t3.dev.evaluation.controller.MessageDataHandlerTests.Constant.TODAY
+import com.samsung.sds.t3.dev.evaluation.controller.MessageDataHandlerTests.Constant.YESTERDAY
 import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.test.runTest
@@ -20,6 +23,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
+@ExperimentalCoroutinesApi
 @WebFluxTest(MessageDataHandler::class)
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
@@ -30,8 +34,10 @@ class MessageDataHandlerTests {
     @Autowired
     private lateinit var wtc: WebTestClient
 
-    private val TODAY = OffsetDateTime.parse("2023-02-23T18:15:17+09:00")
-    private val YESTERDAY = TODAY.minusDays(1)
+    private object Constant {
+        val TODAY: OffsetDateTime = OffsetDateTime.parse("2023-02-23T18:15:17+09:00")
+        val YESTERDAY: OffsetDateTime = TODAY.minusDays(1)
+    }
     @Test
     @FlowPreview
     fun `uuid로 1건 조회하기`() {
@@ -50,13 +56,22 @@ class MessageDataHandlerTests {
     }
 
     @Test
+    fun `없는 id값의 데이터 조회하기`() {
+        val sampleUUID = UUID.randomUUID().toString()
+
+        wtc.get().uri("/api/messageData/$sampleUUID")
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
     fun `특정 시간대 데이터 조회하기`() {
         val startDateQueryParam = "2023-02-22T18:15:17"
         val endDateQueryParam = "2023-02-23T18:15:17"
         val startDate = LocalDateTime.parse(startDateQueryParam)
         val endDate = LocalDateTime.parse(endDateQueryParam)
 
-        val messageDTOList = listOf<MessageDataDTO>(
+        val messageDTOList = listOf(
             MessageDataDTO(sentDateTime = TODAY.minusHours(1)),
             MessageDataDTO(sentDateTime = YESTERDAY))
         messageDTOList.forEach { println(it) }
@@ -97,7 +112,7 @@ class MessageDataHandlerTests {
 
     @Test
     fun `특정 유저의 데이터 조회`() {
-        val messageDTOList = listOf<MessageDataDTO>(
+        val messageDTOList = listOf(
             MessageDataDTO(slackUserName = "test"),
             MessageDataDTO(slackUserName = "test"))
         messageDTOList.forEach { println(it) }
@@ -118,7 +133,7 @@ class MessageDataHandlerTests {
 
     @Test
     fun `특정 인스턴스에서 보내진 모든 메시지 조회`() {
-        val messageDTOList = listOf<MessageDataDTO>(
+        val messageDTOList = listOf(
             MessageDataDTO(instanceId = "test"),
             MessageDataDTO(instanceId = "test"))
         messageDTOList.forEach { println(it) }

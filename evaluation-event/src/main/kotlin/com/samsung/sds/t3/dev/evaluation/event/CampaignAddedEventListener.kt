@@ -33,19 +33,18 @@ class CampaignAddedEventListener (
         }.subscribe()
     }
 
-    suspend fun handleMessage(message: Message<CampaignDTO>) {
+    private suspend fun handleMessage(message: Message<CampaignDTO>) {
 
         val entity = messageDataCommandService.createMessageDataEntity(message)
-        val saved = messageDataCommandService.saveMessageDataEntity(entity)
 
-        if (saved.isPass) {
+        if (entity.isPass) {
             log.info("student send appropriate message")
-            slackMessagingService.postMessage(saved)
-            notificationEventPublisher.publishNotificationSuccessEvent(saved)
+            slackMessagingService.postMessage(entity)
+            notificationEventPublisher.publishNotificationSuccessEvent(entity)
         } else {
             log.info("student send erroneous message")
-            saved.slackUserId?.run {
-                notificationEventPublisher.publishNotificationFailedEvent(saved)
+            entity.slackUserId?.run {
+                notificationEventPublisher.publishNotificationFailedEvent(entity)
             }
         }
     }
@@ -54,7 +53,7 @@ class CampaignAddedEventListener (
     fun errorHandler() : Consumer<Flux<ErrorMessage>> = Consumer { message ->
         message.log()
             .subscribe {
-                log.info("error occured: \n$it")
+                log.info("error occurred: \n$it")
             }
     }
 }

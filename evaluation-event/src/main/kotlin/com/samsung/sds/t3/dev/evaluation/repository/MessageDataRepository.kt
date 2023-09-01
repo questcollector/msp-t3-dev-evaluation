@@ -7,4 +7,4 @@ import java.util.*
 
 
 @Repository
-interface MessageDataRepository: CoroutineCrudRepository<MessageDataEntity, UUID> {}
+interface MessageDataRepository: CoroutineCrudRepository<MessageDataEntity, UUID>
