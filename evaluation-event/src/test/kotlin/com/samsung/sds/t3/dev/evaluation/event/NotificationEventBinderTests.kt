@@ -1,8 +1,7 @@
 package com.samsung.sds.t3.dev.evaluation.event
 
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,7 +12,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cloud.stream.binder.test.OutputDestination
 import org.springframework.test.context.ActiveProfiles
 
-@ExperimentalCoroutinesApi
+
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(MockitoExtension::class)
@@ -26,13 +25,14 @@ class NotificationEventBinderTests {
     lateinit var notificationEventPublisher: NotificationEventPublisher
 
     @Test
-    fun `success event 테스트`() = runTest {
-        val messageDataDTO = MessageDataEntity(slackUserId = "id", slackUserName = "test", isPass = true)
-        notificationEventPublisher.publishNotificationSuccessEvent(messageDataDTO)
+    fun `success event 테스트`() {
+        runBlocking {
+            val messageDataDTO = MessageDataEntity(slackUserId = "id", slackUserName = "test", isPass = true)
+            notificationEventPublisher.publishNotificationSuccessEvent(messageDataDTO)
 
-        val outputBinding = "notificationSuccessEvent"
-        val output = outputDestination.receive(0, outputBinding)
-        val payload = """
+            val outputBinding = "notificationSuccessEvent"
+            val output = outputDestination.receive(0, outputBinding)
+            val payload = """
             Excellent @${messageDataDTO.slackUserName}, 
             You have successfully completed the development practice assignment
             You can check the same UUID below in the DM on Slack
@@ -42,18 +42,20 @@ class NotificationEventBinderTests {
             
         """.trimIndent()
 
-        assertThat(output.headers["routingkey"] as String).isEqualTo("id")
-        assertThat(output.payload).isEqualTo(payload.toByteArray())
+            assertThat(output.headers["routingkey"] as String).isEqualTo("id")
+            assertThat(output.payload).isEqualTo(payload.toByteArray())
+        }
     }
 
     @Test
-    fun `failed event 테스트`() = runTest {
-        val messageDataDTO = MessageDataEntity(slackUserId = "id", instanceId = "instance-id", isPass = true)
-        notificationEventPublisher.publishNotificationFailedEvent(messageDataDTO)
+    fun `failed event 테스트`() {
+        runBlocking {
+            val messageDataDTO = MessageDataEntity(slackUserId = "id", instanceId = "instance-id", isPass = true)
+            notificationEventPublisher.publishNotificationFailedEvent(messageDataDTO)
 
-        val outputBinding = "notificationFailedEvent"
-        val output = outputDestination.receive(0, outputBinding)
-        val payload = """
+            val outputBinding = "notificationFailedEvent"
+            val output = outputDestination.receive(0, outputBinding)
+            val payload = """
             This is reply to the message from EC2 instance which id is ${messageDataDTO.instanceId}.
             The requirement was not fulfilled. Please check the following information.
             1. Please check "slack.user.id" property in application.properties file.
@@ -61,7 +63,8 @@ class NotificationEventBinderTests {
             
         """.trimIndent()
 
-        assertThat(output.headers["routingkey"] as String).isEqualTo("id")
-        assertThat(output.payload).isEqualTo(payload.toByteArray())
+            assertThat(output.headers["routingkey"] as String).isEqualTo("id")
+            assertThat(output.payload).isEqualTo(payload.toByteArray())
+        }
     }
 }

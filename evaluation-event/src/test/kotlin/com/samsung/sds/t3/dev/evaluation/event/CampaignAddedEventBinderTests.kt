@@ -3,8 +3,7 @@ package com.samsung.sds.t3.dev.evaluation.event
 import com.samsung.sds.t3.dev.evaluation.model.CampaignDTO
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataCommandService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -18,7 +17,7 @@ import org.springframework.cloud.stream.binder.test.InputDestination
 import org.springframework.messaging.support.GenericMessage
 import org.springframework.test.context.ActiveProfiles
 
-@ExperimentalCoroutinesApi
+
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(MockitoExtension::class)
@@ -30,7 +29,7 @@ class CampaignAddedEventBinderTests {
     lateinit var messageDataCommandService: MessageDataCommandService
 
     @Test
-    fun `campaignAddedEvent Binder test`() = runTest {
+    fun `campaignAddedEvent Binder test`() = runBlocking {
         val payload = CampaignDTO(campaignId = 1, campaignName = "name1")
         val inputMessage = GenericMessage(payload)
         val inputBinding = "campaignAddedEvent"

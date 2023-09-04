@@ -11,12 +11,11 @@ import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryServiceTests.Co
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactor.asFlux
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,7 +27,7 @@ import java.util.*
 
 private const val TEST = "test"
 
-@ExperimentalCoroutinesApi
+
 @ExtendWith(MockKExtension::class)
 class MessageDataQueryServiceTests {
 
@@ -61,7 +60,7 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runTest {
+        runBlocking {
             val result = messageDataQueryService.getMessageDataDuring(
                 YESTERDAY, TODAY
             )
@@ -91,7 +90,7 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runTest {
+        runBlocking {
             val result = messageDataQueryService.getMessageDataDuring()
 
             val expect = expectEntities.map { it.toMessageDataDTO() }
@@ -115,7 +114,7 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runTest {
+        runBlocking {
             val result = messageDataQueryService.getMessageDataWithSlackUserName(TEST)
 
             val expect = expectedEntities.map { it.toMessageDataDTO() }
@@ -137,7 +136,7 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runTest {
+        runBlocking {
             val result = messageDataQueryService.getMessageDataWithInstanceId(TEST)
             val expect = expectedEntities.map { it.toMessageDataDTO() }
             StepVerifier.create(result.asFlux())
@@ -154,14 +153,14 @@ class MessageDataQueryServiceTests {
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
 
-        runTest {
+        runBlocking {
             val result = messageDataQueryService.getMessageDataByMessageUuid(SAMPLE_UUID1.toString())
             assertThat(result).isEqualTo(expectedEntity.toMessageDataDTO())
         }
     }
 
     @Test
-    fun `없는 메시지 조회`() = runTest {
+    fun `없는 메시지 조회`() = runBlocking {
         coEvery { messageDataRepository.findById(SAMPLE_UUID2) } returns null
 
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
@@ -171,7 +170,7 @@ class MessageDataQueryServiceTests {
     }
 
     @Test
-    fun `잘못된 UUID로 조회`() = runTest {
+    fun `잘못된 UUID로 조회`() = runBlocking {
         val messageDataQueryService = MessageDataQueryService(messageDataRepository)
         val result = messageDataQueryService.getMessageDataByMessageUuid("some-random-text")
         assertThat(result).isNull()
