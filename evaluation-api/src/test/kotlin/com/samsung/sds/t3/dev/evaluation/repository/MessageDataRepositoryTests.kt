@@ -27,7 +27,6 @@ private const val TEST = "test"
 @DataMongoTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class MessageDataRepositoryTests (
     @Autowired
     private val messageDataRepository: MessageDataRepository
