@@ -10,10 +10,11 @@ import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.spyk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.reactor.asFlux
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,8 +28,9 @@ import kotlin.reflect.jvm.isAccessible
 
 private const val TEST = "test"
 
-
+@ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
+@FlowPreview
 class EvaluationResultServiceTests {
 
     private val messageDataRepository = mockk<MessageDataRepository>()
@@ -50,7 +52,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", true)
@@ -71,7 +73,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", true)
@@ -90,7 +92,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -105,7 +107,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, YESTERDAY, TODAY)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -125,7 +127,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -145,7 +147,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId(TEST, LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -166,7 +168,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val result = evaluationResultService.getEvaluationResultBySlackUserId("user1", LocalDateTime.MIN, LocalDateTime.MAX)
             assertThat(result)
                 .hasFieldOrPropertyWithValue("result", false)
@@ -185,7 +187,7 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
+        runTest {
             val isCheatedMethod = evaluationResultService::class.declaredMemberFunctions.find { it.name == "isCheated" }
 
             val result = isCheatedMethod?.let {
@@ -196,7 +198,6 @@ class EvaluationResultServiceTests {
         }
     }
 
-    @FlowPreview
     @Test
     fun `csv ByteArray를 SlackMemberVO로 변환`() {
         val csv = flow {
@@ -214,14 +215,11 @@ class EvaluationResultServiceTests {
 
         val evaluationResultService = EvaluationResultService(messageDataRepository)
 
-        runBlocking {
-            val slackMembers = evaluationResultService.readCsv(csv)
+        val slackMembers = evaluationResultService.readCsv(csv)
 
-            StepVerifier.create(slackMembers.asFlux())
-                .expectNext(slackMember)
-                .verifyComplete()
-//            assertThat(slackMembers.first()).isEqualTo(slackMember)
-        }
+        StepVerifier.create(slackMembers.asFlux())
+            .expectNext(slackMember)
+            .verifyComplete()
     }
 
     @Test
@@ -240,17 +238,13 @@ class EvaluationResultServiceTests {
             evaluationResultService.getEvaluationResultBySlackUserId("U059H0Z4PH6", LocalDateTime.MIN, LocalDateTime.MAX)
         } returns EvaluationResultDTO(true, "OK", emptyList())
 
-        runBlocking {
-            val slackMembers = evaluationResultService.getResults(flowOf(slackMember), LocalDateTime.MIN, LocalDateTime.MAX)
-            StepVerifier.create(slackMembers.asFlux())
-                .assertNext {
-                    assertEquals(it.result, "OK")
-                }.verifyComplete()
-//            assertThat(slackMembers.first().result).isEqualTo("OK")
-        }
+        val slackMembers = evaluationResultService.getResults(flowOf(slackMember), LocalDateTime.MIN, LocalDateTime.MAX)
+        StepVerifier.create(slackMembers.asFlux())
+            .assertNext {
+                assertEquals(it.result, "OK")
+            }.verifyComplete()
     }
 
-    @FlowPreview
     @Test
     fun `csv 파일 쓰기`() {
         val slackMember = SlackMemberVO(
@@ -267,14 +261,12 @@ class EvaluationResultServiceTests {
         val csvHeader = "userid,fullname,displayname,result_\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?\n"
         val csvRow = "${slackMember.userId},\"${slackMember.fullname}\",\"${slackMember.displayname}\",${slackMember.result}\n"
 
-        runBlocking {
-            val bytes = evaluationResultService.writeCsv(flowOf(slackMember))
-            StepVerifier.create(bytes.map { String(it, Charsets.UTF_8) }.asFlux())
-                .assertNext {
-                    assertTrue(it.matches(csvHeader.toRegex()))
-                }.assertNext {
-                    assertEquals(it, csvRow)
-                }.verifyComplete()
-        }
+        val bytes = evaluationResultService.writeCsv(flowOf(slackMember))
+        StepVerifier.create(bytes.map { String(it, Charsets.UTF_8) }.asFlux())
+            .assertNext {
+                assertTrue(it.matches(csvHeader.toRegex()))
+            }.assertNext {
+                assertEquals(it, csvRow)
+            }.verifyComplete()
     }
 }

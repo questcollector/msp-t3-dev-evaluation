@@ -4,7 +4,8 @@ import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import com.slack.api.Slack
 import com.slack.api.methods.request.auth.AuthTestRequest
 import com.slack.api.methods.response.conversations.ConversationsOpenResponse
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeAll
@@ -16,7 +17,7 @@ import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.jvm.isAccessible
 
-
+@ExperimentalCoroutinesApi
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SlackMessagingServiceTests {
 
@@ -48,7 +49,7 @@ class SlackMessagingServiceTests {
         val slackMessagingService = SlackMessagingService(slack)
         slackMessagingService.slackToken = token
 
-        runBlocking {
+        runTest {
             val getDirectChannelMethod = slackMessagingService::class.declaredMemberFunctions
                 .find{ it.name == "getDirectChannel" }
             getDirectChannelMethod?.let {
@@ -64,7 +65,7 @@ class SlackMessagingServiceTests {
         val slackMessagingService = SlackMessagingService(slack)
         slackMessagingService.slackToken = token
 
-        runBlocking {
+        runTest {
             val getDirectChannelMethod = slackMessagingService::class.declaredMemberFunctions
                 .find{ it.name == "getDirectChannel" }
             getDirectChannelMethod?.let {
@@ -85,7 +86,7 @@ class SlackMessagingServiceTests {
             slackUserId = userId
         )
 
-        runBlocking {
+        runTest {
             val response = slackMessagingService.postMessage(message)
             assertThat(response.isOk).isTrue
 
@@ -101,7 +102,7 @@ class SlackMessagingServiceTests {
             slackUserId = "<<SLACK_USER_ID>>"
         )
 
-        runBlocking {
+        runTest {
             assertThrows<NoSuchElementException> {
                 slackMessagingService.postMessage(message)
             }

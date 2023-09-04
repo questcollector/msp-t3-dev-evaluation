@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
@@ -52,7 +52,7 @@ class EvaluationResultHandlerTests {
     @Test
     fun `startDate, endDate 안 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runBlocking {
+        runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
@@ -72,7 +72,7 @@ class EvaluationResultHandlerTests {
     @Test
     fun `이상한 startDate, endDate 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runBlocking {
+        runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
@@ -99,7 +99,7 @@ class EvaluationResultHandlerTests {
         val startDateTime = LocalDateTime.parse(startDate)
         val endDateTime = LocalDateTime.parse(endDate)
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runBlocking {
+        runTest {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, startDateTime, endDateTime))
                 .willReturn(result)
@@ -151,7 +151,7 @@ class EvaluationResultHandlerTests {
         }
 
         // Mocking
-        runBlocking {
+        runTest {
             given(evaluationResultService.readCsv(any()))
                 .willReturn(slackMembers)
             given(evaluationResultService.getResults(slackMembers, LocalDateTime.MIN, LocalDateTime.MAX))

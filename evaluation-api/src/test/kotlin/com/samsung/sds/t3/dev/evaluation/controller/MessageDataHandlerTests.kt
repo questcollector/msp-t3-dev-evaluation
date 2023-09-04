@@ -7,7 +7,7 @@ import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryService
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,7 +41,7 @@ class MessageDataHandlerTests {
     @FlowPreview
     fun `uuid로 1건 조회하기`() {
         val messageDataDTO = MessageDataDTO(UUID.randomUUID().toString())
-        runBlocking {
+        runTest {
             given(messageDataQueryService.getMessageDataByMessageUuid(messageDataDTO.messageId!!))
                 .willReturn(messageDataDTO)
         }
@@ -75,7 +75,7 @@ class MessageDataHandlerTests {
             MessageDataDTO(sentDateTime = YESTERDAY))
         messageDTOList.forEach { println(it) }
 
-        runBlocking {
+        runTest {
             given(messageDataQueryService.getMessageDataDuring(startDate, endDate))
                 .willReturn(messageDTOList.asFlow())
         }
@@ -116,7 +116,7 @@ class MessageDataHandlerTests {
             MessageDataDTO(slackUserName = "test"))
         messageDTOList.forEach { println(it) }
 
-        runBlocking {
+        runTest {
             given(messageDataQueryService.getMessageDataWithSlackUserName("test"))
                 .willReturn(messageDTOList.asFlow())
         }
@@ -137,7 +137,7 @@ class MessageDataHandlerTests {
             MessageDataDTO(instanceId = "test"))
         messageDTOList.forEach { println(it) }
 
-        runBlocking {
+        runTest {
             given(messageDataQueryService.getMessageDataWithInstanceId("test"))
                 .willReturn(messageDTOList.asFlow())
         }

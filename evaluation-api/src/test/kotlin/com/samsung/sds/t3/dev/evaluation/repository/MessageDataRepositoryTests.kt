@@ -5,8 +5,9 @@ import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.C
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.TODAY
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.YESTERDAY
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.reactor.asFlux
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -24,6 +25,7 @@ import java.util.*
 private const val TEST = "test"
 
 
+@ExperimentalCoroutinesApi
 @DataMongoTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
@@ -44,7 +46,7 @@ class MessageDataRepositoryTests (
 
     @BeforeAll
     fun `테스트 데이터 입력`() {
-        runBlocking {
+        runTest {
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = TODAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
             entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = NOW, slackUserName = TEST)))
@@ -56,26 +58,24 @@ class MessageDataRepositoryTests (
 
     @AfterAll
     fun `테스트 데이터 삭제`() {
-        runBlocking {
+        runTest {
             messageDataRepository.deleteAll()
         }
     }
 
     @Test
     fun `유저 이름으로 보낸 메시지 조회하기`() {
-        runBlocking {
-            val result = messageDataRepository.findAllBySlackUserNameStartsWith(TEST)
-            StepVerifier.create(result.asFlux())
-                .expectNext (entities[2], entities[3])
-                .expectComplete()
-                .log()
-                .verify()
-        }
+        val result = messageDataRepository.findAllBySlackUserNameStartsWith(TEST)
+        StepVerifier.create(result.asFlux())
+            .expectNext (entities[2], entities[3])
+            .expectComplete()
+            .log()
+            .verify()
     }
 
     @Test
     fun `특정 uuid 데이터 조회`() {
-        runBlocking {
+        runTest {
             val result = messageDataRepository.findById(SAMPLE_UUID)
             assertThat(result).isEqualTo(entities[4])
         }
@@ -83,11 +83,9 @@ class MessageDataRepositoryTests (
 
     @Test
     fun `특정 instanceId의 데이터 조회`() {
-        runBlocking {
-            val result = messageDataRepository.findAllByInstanceId(TEST)
-            StepVerifier.create(result.asFlux())
-                .expectNext(entities[5])
-                .verifyComplete()
-        }
+        val result = messageDataRepository.findAllByInstanceId(TEST)
+        StepVerifier.create(result.asFlux())
+            .expectNext(entities[5])
+            .verifyComplete()
     }
 }
