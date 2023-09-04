@@ -5,6 +5,7 @@ import com.samsung.sds.t3.dev.evaluation.controller.MessageDataHandlerTests.Cons
 import com.samsung.sds.t3.dev.evaluation.controller.MessageDataHandlerTests.Constant.YESTERDAY
 import com.samsung.sds.t3.dev.evaluation.model.MessageDataDTO
 import com.samsung.sds.t3.dev.evaluation.service.MessageDataQueryService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.test.runTest
@@ -22,7 +23,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
-
+@ExperimentalCoroutinesApi
 @WebFluxTest(MessageDataHandler::class)
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
