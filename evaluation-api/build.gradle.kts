@@ -32,7 +32,7 @@ dependencies {
 
     // mongodb
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
-    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.9.2")
+//    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.9.2")
 
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.0.2")
 
