@@ -8,8 +8,7 @@ import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.spyk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -17,7 +16,7 @@ import org.springframework.messaging.support.GenericMessage
 import org.springframework.messaging.support.MessageBuilder
 import reactor.core.publisher.Flux
 
-@ExperimentalCoroutinesApi
+
 @ExtendWith(MockKExtension::class)
 class CampaignAddedEventTests {
     private val messageDataCommandService = mockk<MessageDataCommandService>()
@@ -25,7 +24,7 @@ class CampaignAddedEventTests {
     private val notificationEventPublisher = mockk<NotificationEventPublisher>()
 
     @Test
-    fun `consumer test`() = runTest {
+    fun `consumer test`() = runBlocking {
 
         val campaigns = Flux.just(
             CampaignDTO(campaignId = 1, campaignName = "name1"),

@@ -1,8 +1,7 @@
 package com.samsung.sds.t3.dev.evaluation.event
 
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,7 +12,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cloud.stream.binder.test.OutputDestination
 import org.springframework.test.context.ActiveProfiles
 
-@ExperimentalCoroutinesApi
+
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(MockitoExtension::class)
@@ -26,7 +25,7 @@ class NotificationEventBinderTests {
     lateinit var notificationEventPublisher: NotificationEventPublisher
 
     @Test
-    fun `success event 테스트`() = runTest {
+    fun `success event 테스트`() = runBlocking {
         val messageDataDTO = MessageDataEntity(slackUserId = "id", slackUserName = "test", isPass = true)
         notificationEventPublisher.publishNotificationSuccessEvent(messageDataDTO)
 
@@ -47,7 +46,7 @@ class NotificationEventBinderTests {
     }
 
     @Test
-    fun `failed event 테스트`() = runTest {
+    fun `failed event 테스트`() = runBlocking {
         val messageDataDTO = MessageDataEntity(slackUserId = "id", instanceId = "instance-id", isPass = true)
         notificationEventPublisher.publishNotificationFailedEvent(messageDataDTO)
 

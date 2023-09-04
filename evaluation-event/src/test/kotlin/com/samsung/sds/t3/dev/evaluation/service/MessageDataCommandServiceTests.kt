@@ -6,8 +6,7 @@ import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
 import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -19,7 +18,7 @@ import java.util.*
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.jvm.isAccessible
 
-@ExperimentalCoroutinesApi
+
 @ExtendWith(MockKExtension::class)
 class MessageDataCommandServiceTests {
 
@@ -68,7 +67,7 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        runTest {
+        runBlocking {
             val createdMessageDataEntity = messageDataCommandService.createMessageDataEntity(message)
             assertThat(createdMessageDataEntity)
                 .isEqualTo(entity)
@@ -89,7 +88,7 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        runTest {
+        runBlocking {
             val calculateIsPassMethod = messageDataCommandService::class.declaredMemberFunctions
                 .find { it.name == "calculateIsPass" }
             val result = calculateIsPassMethod?.let {
@@ -114,7 +113,7 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        runTest {
+        runBlocking {
             val calculateIsPassMethod = messageDataCommandService::class.declaredMemberFunctions
                 .find { it.name == "calculateIsPass" }
             val result = calculateIsPassMethod?.let {
@@ -139,7 +138,7 @@ class MessageDataCommandServiceTests {
             slackUserInfoService
         )
 
-        runTest {
+        runBlocking {
             val calculateIsPassMethod = messageDataCommandService::class.declaredMemberFunctions
                 .find { it.name == "calculateIsPass" }
             val result = calculateIsPassMethod?.let {
@@ -170,7 +169,7 @@ class MessageDataCommandServiceTests {
         calculateIsPass.trySetAccessible()
 
 
-        runTest {
+        runBlocking {
             val result = calculateIsPass.invoke(messageDataCommandService, message.headers, null) as Boolean
             assertThat(result).isFalse
         }

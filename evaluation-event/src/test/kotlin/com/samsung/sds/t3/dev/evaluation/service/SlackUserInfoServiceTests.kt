@@ -2,15 +2,14 @@ package com.samsung.sds.t3.dev.evaluation.service
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.auth.AuthTestRequest
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
-@ExperimentalCoroutinesApi
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SlackUserInfoServiceTests {
     private val slack = Slack.getInstance()
@@ -41,7 +40,7 @@ class SlackUserInfoServiceTests {
         val slackUserInfoService = SlackUserInfoService(slack)
         slackUserInfoService.slackToken = token
 
-        runTest {
+        runBlocking {
             val result = slackUserInfoService.getSlackUserNameWithSlackUserId(userId)
             assertThat(result).isNotNull
         }
@@ -52,7 +51,7 @@ class SlackUserInfoServiceTests {
         val slackUserInfoService = SlackUserInfoService(slack)
         slackUserInfoService.slackToken = token
 
-        runTest {
+        runBlocking {
             val result = slackUserInfoService.getSlackUserNameWithSlackUserId("<<SLACK_USER_ID>>")
             assertThat(result).isNull()
         }

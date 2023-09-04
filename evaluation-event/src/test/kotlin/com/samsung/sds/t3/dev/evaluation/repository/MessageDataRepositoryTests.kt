@@ -3,8 +3,7 @@ package com.samsung.sds.t3.dev.evaluation.repository
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.TODAY
 import com.samsung.sds.t3.dev.evaluation.repository.MessageDataRepositoryTests.Constant.YESTERDAY
 import com.samsung.sds.t3.dev.evaluation.repository.entity.MessageDataEntity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -17,7 +16,7 @@ import java.time.LocalDateTime
 
 private const val TEST = "test"
 
-@ExperimentalCoroutinesApi
+
 @DataMongoTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
@@ -34,21 +33,25 @@ class MessageDataRepositoryTests (
         mutableListOf()
 
     @BeforeAll
-    fun `테스트 데이터 입력`() = runTest {
-        entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = TODAY)))
-        entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
-        entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
-        entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
-        entities.add(messageDataRepository.save(MessageDataEntity()))
+    fun `테스트 데이터 입력`() {
+        runBlocking {
+            entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = TODAY)))
+            entities.add(messageDataRepository.save(MessageDataEntity(sentDateTime = YESTERDAY)))
+            entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
+            entities.add(messageDataRepository.save(MessageDataEntity(slackUserName = TEST)))
+            entities.add(messageDataRepository.save(MessageDataEntity()))
+        }
     }
 
 
     @AfterAll
-    fun `테스트 데이터 삭제`() = runTest {
-        messageDataRepository.deleteAll()
+    fun `테스트 데이터 삭제`() {
+        runBlocking {
+            messageDataRepository.deleteAll()
+        }
     }
 
     @Test
-    fun `save 메소드 테스트`() = runTest {  }
+    fun `save 메소드 테스트`() { }
 
 }

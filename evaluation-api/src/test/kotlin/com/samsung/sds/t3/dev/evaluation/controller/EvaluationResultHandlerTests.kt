@@ -4,13 +4,12 @@ import com.samsung.sds.t3.dev.evaluation.config.EvaluationResultRouter
 import com.samsung.sds.t3.dev.evaluation.model.EvaluationResultDTO
 import com.samsung.sds.t3.dev.evaluation.model.SlackMemberVO
 import com.samsung.sds.t3.dev.evaluation.service.EvaluationResultService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
@@ -31,7 +30,7 @@ private const val OK = "OK"
 
 private const val TEST = "test"
 
-@ExperimentalCoroutinesApi
+
 @WebFluxTest(EvaluationResultHandler::class)
 @ActiveProfiles(TEST)
 @AutoConfigureWebTestClient
@@ -53,7 +52,7 @@ class EvaluationResultHandlerTests {
     @Test
     fun `startDate, endDate 안 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runTest {
+        runBlocking {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
@@ -73,7 +72,7 @@ class EvaluationResultHandlerTests {
     @Test
     fun `이상한 startDate, endDate 보냈을 경우`() {
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runTest {
+        runBlocking {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, LocalDateTime.MIN, LocalDateTime.MAX))
                 .willReturn(result)
@@ -100,7 +99,7 @@ class EvaluationResultHandlerTests {
         val startDateTime = LocalDateTime.parse(startDate)
         val endDateTime = LocalDateTime.parse(endDate)
         val result = EvaluationResultDTO(true, OK, emptyList())
-        runTest {
+        runBlocking {
             given(evaluationResultService.getEvaluationResultBySlackUserId(
                 TEST, startDateTime, endDateTime))
                 .willReturn(result)
@@ -152,7 +151,7 @@ class EvaluationResultHandlerTests {
         }
 
         // Mocking
-        runTest {
+        runBlocking {
             given(evaluationResultService.readCsv(any()))
                 .willReturn(slackMembers)
             given(evaluationResultService.getResults(slackMembers, LocalDateTime.MIN, LocalDateTime.MAX))
