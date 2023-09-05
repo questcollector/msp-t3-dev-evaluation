@@ -8,7 +8,6 @@ import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.spyk
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,7 +23,7 @@ class CampaignAddedEventTests {
     private val notificationEventPublisher = mockk<NotificationEventPublisher>()
 
     @Test
-    fun `consumer test`() = runBlocking {
+    fun `consumer test`() {
 
         val campaigns = Flux.just(
             CampaignDTO(campaignId = 1, campaignName = "name1"),
