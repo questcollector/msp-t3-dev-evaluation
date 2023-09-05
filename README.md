@@ -33,11 +33,14 @@ msp-t3-evaluation-deploy 참조
    ```
 
 2. Rabbitmq config
-   - JSON설정 파일을 rabbitmq management에서  
+   - python 스크립트로 JSON설정 파일 생성하기<br>
+     ```python rabbitmq-definition-generator.py <<admin-password>>```<br>
+     `<<admin-password>>`에는 admin 계정의 패스워드로 사용할 값 입력<br>
+     입력값이 없을 경우 기본값이 `admin`으로 지정됩니다.
+   - 생성된 `rabbitmq-definition.json` JSON설정 파일을 rabbitmq management에서  
      :link: <http://localhost:15672>  </br>
      Overview > Import definitions 에 업로드하여 Upload broker definitions 버튼을 클릭합니다.
      ![rabbitmq-management](img/rabbitmq-management.png)</br>
-   - rabbitmq 설정 JSON 파일 문의 [miroirs01@gmail.com](mailto:miroirs01@gmail.com)
    - 적용 후 logout 하고 admin 계정으로 로그인합니다.
 3. evaluation-api 실행
    - 실행 시 Edit configuration을 하여 Program arguments 수정
