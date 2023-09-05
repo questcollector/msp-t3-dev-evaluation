@@ -10,19 +10,16 @@ name: evaluation-event ci pipeline
 on:
   workflow_dispatch:
     inputs:
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
-        type: choice
-        options:
-          - info
-          - warning
-          - debug
-      tags:
-        description: 'Test scenario tags'
+      enableDockerPush:
+        description: 'enable Docker Push action'
         required: false
+        default: true
         type: boolean
+      tag:
+        description: 'docker image tag'
+        required: false
+        default: latest
+        type: string
 #  push:
 #    paths:
 #      - 'evaluation-api/**'
@@ -37,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT: evaluation-event
-      TAG: latest
+      TAG: ${{ inputs.tag }}
       ROLE_ARN: arn:aws:iam::275291497228:role/github-actions-ecr-full-access
       AWS_REGION: us-east-1
     
@@ -72,6 +69,6 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./${{ env.PROJECT }}
-        push: true
+        push: ${{ inputs.enableDockerPush }}
         tags: |
           ${{ steps.login-ecr.outputs.registry }}/${{ env.PROJECT }}:${{ env.TAG }}
