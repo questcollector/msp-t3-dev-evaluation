@@ -8,8 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito
-import org.mockito.Mockito.doAnswer
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -36,12 +36,13 @@ class CampaignAddedEventBinderTests {
         val inputBinding = "campaignAddedEvent"
 
         runTest {
-            doAnswer {
-                val argument = it.getArgument(0) as GenericMessage<CampaignDTO>
-                println(argument)
-                assertThat(argument.payload).isEqualTo(payload)
-                MessageDataEntity(isPass = false, payload = argument.payload.toString())
-            }.`when`(messageDataCommandService).createMessageDataEntity(any())
+            given(messageDataCommandService.createMessageDataEntity(any()))
+                .willAnswer {
+                    val argument = it.getArgument(0) as GenericMessage<CampaignDTO>
+                    println(argument)
+                    assertThat(argument.payload).isEqualTo(payload)
+                    MessageDataEntity(isPass = false, payload = argument.payload.toString())
+                }
         }
 
         inputDestination.send(inputMessage, inputBinding)
