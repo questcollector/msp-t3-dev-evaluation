@@ -23,6 +23,10 @@ class MessageDataCommandService (
 
     private val log : Logger = LoggerFactory.getLogger(this.javaClass)
 
+    private val zoneOffset = ZoneOffset.ofHours(9)
+    private val instanceIdRegex = Regex("i-[0-9a-z]{17}")
+    private val ipAddressRegex = Regex("172\\.31\\.\\d{1,3}\\.\\d{1,3}")
+
     suspend fun createMessageDataEntity(messageDataDTO: Message<CampaignDTO>): MessageDataEntity {
 
         log.info("createMessageDataEntity invoked")
@@ -33,19 +37,22 @@ class MessageDataCommandService (
             slackUserInfoService.getSlackUserNameWithSlackUserId(it as String)
         }
 
-        val sentDateTime: LocalDateTime? = headers.timestamp?.run {
-            val epochSecond = this / 1_000
-            val nano = this % 1_000 * 1_000_000
-            LocalDateTime.ofEpochSecond(
-                epochSecond,
-                nano.toInt(),
-                ZoneOffset.ofHours(9)
-            )
+        val sentDateTime = when(val timestamp = headers.timestamp) {
+            null -> LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
+            else -> {
+                val epochSecond = timestamp / 1_000
+                val nano = timestamp % 1_000 * 1_000_000
+                LocalDateTime.ofEpochSecond(
+                    epochSecond,
+                    nano.toInt(),
+                    zoneOffset
+                )
+            }
         }
 
         val messageEntity = MessageDataEntity(
             id = UUID.randomUUID(),
-            sentDateTime = sentDateTime?: LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
+            sentDateTime = sentDateTime,
             instanceId = headers["InstanceId"] as? String,
             ipAddress = headers["IpAddress"] as? String,
             slackUserId = headers["SlackUserId"] as? String,
@@ -64,16 +71,11 @@ class MessageDataCommandService (
 
         val instanceId: String? = headers["InstanceId"] as? String
         val ipAddress: String? = headers["IpAddress"] as? String
-        val instanceIdRegex = Regex("i-[0-9a-z]{17}")
-        val ipAddressRegex = Regex("172\\.31\\.\\d{1,3}\\.\\d{1,3}")
 
         instanceId ?: return false
         ipAddress ?: return false
         slackUserName ?: return false
 
-        if (!instanceIdRegex.matches(instanceId)) return false
-        if (!ipAddressRegex.matches(ipAddress)) return false
-        
-        return true
+        return instanceIdRegex.matches(instanceId) && ipAddressRegex.matches(ipAddress)
     }
 }
