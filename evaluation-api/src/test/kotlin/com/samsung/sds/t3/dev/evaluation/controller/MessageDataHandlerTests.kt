@@ -76,10 +76,8 @@ class MessageDataHandlerTests {
             MessageDataDTO(sentDateTime = YESTERDAY))
         messageDTOList.forEach { println(it) }
 
-        runTest {
-            given(messageDataQueryService.getMessageDataDuring(startDate, endDate))
-                .willReturn(messageDTOList.asFlow())
-        }
+        given(messageDataQueryService.getMessageDataDuring(startDate, endDate))
+            .willReturn(messageDTOList.asFlow())
 
         wtc.get().uri {
             it.path("/api/messageData/")
@@ -117,10 +115,8 @@ class MessageDataHandlerTests {
             MessageDataDTO(slackUserName = "test"))
         messageDTOList.forEach { println(it) }
 
-        runTest {
-            given(messageDataQueryService.getMessageDataWithSlackUserName("test"))
-                .willReturn(messageDTOList.asFlow())
-        }
+        given(messageDataQueryService.getMessageDataWithSlackUserName("test"))
+            .willReturn(messageDTOList.asFlow())
 
         wtc.get().uri ("/api/messageData/slackUserName/test")
             .exchange()
@@ -138,10 +134,8 @@ class MessageDataHandlerTests {
             MessageDataDTO(instanceId = "test"))
         messageDTOList.forEach { println(it) }
 
-        runTest {
-            given(messageDataQueryService.getMessageDataWithInstanceId("test"))
-                .willReturn(messageDTOList.asFlow())
-        }
+        given(messageDataQueryService.getMessageDataWithInstanceId("test"))
+            .willReturn(messageDTOList.asFlow())
 
         wtc.get().uri ("/api/messageData/instanceId/test")
             .exchange()

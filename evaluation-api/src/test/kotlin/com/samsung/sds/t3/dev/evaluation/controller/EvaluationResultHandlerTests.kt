@@ -152,15 +152,12 @@ class EvaluationResultHandlerTests {
         }
 
         // Mocking
-        runTest {
-            given(evaluationResultService.readCsv(any()))
-                .willReturn(slackMembers)
-            given(evaluationResultService.getResults(slackMembers, LocalDateTime.MIN, LocalDateTime.MAX))
-                .willReturn(slackMembers)
-            given(evaluationResultService.writeCsv(slackMembers))
-                .willReturn(csv)
-
-        }
+        given(evaluationResultService.readCsv(any()))
+            .willReturn(slackMembers)
+        given(evaluationResultService.getResults(slackMembers, LocalDateTime.MIN, LocalDateTime.MAX))
+            .willReturn(slackMembers)
+        given(evaluationResultService.writeCsv(slackMembers))
+            .willReturn(csv)
 
         wtc.post().uri {
             it.path("/api/evaluation/overall/")
