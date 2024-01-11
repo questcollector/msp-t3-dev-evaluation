@@ -83,6 +83,3 @@ spring:
   jackson:
     deserialization:
       ADJUST_DATES_TO_CONTEXT_TIME_ZONE: false
-#de.flapdoodle.mongodb:
-#  embedded:
-#    version: 6.0.4
