@@ -14,10 +14,10 @@ data class MessageDataDTO (
      * @return messageId
      */
     @Schema(
-    name = "messageId",
-    example = "6bcd5858-6786-4d93-9d3e-d93785e9e05c",
-    description = "message id: UUID",
-    required = false
+        name = "messageId",
+        example = "6bcd5858-6786-4d93-9d3e-d93785e9e05c",
+        description = "message id: UUID",
+        required = false
     )
     @JsonProperty("messageId")
     val messageId: String? = null,

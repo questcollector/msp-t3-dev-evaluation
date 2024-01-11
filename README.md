@@ -14,7 +14,7 @@ event: [`.github/workflows/event-ci.yml`](.github/workflows/event-ci.yml)
 
 msp-t3-evaluation-deploy 참조
 
-<https://github.com/mspt2/msp-t3-dev-evaluation-deploy>
+<https://github.com/questcollector/msp-t3-dev-evaluation-deploy>
 
 ## 로컬에서 실행
 
@@ -67,7 +67,7 @@ csv 구조
 
 | username  | email               | status | billing-active | has-2fa | has-sso | userid      | fullname     | displayname  | expiration-timestamp |
 |-----------|---------------------|--------|----------------|---------|---------|-------------|--------------|--------------|----------------------|
-| miroirs01 | miroirs01@gmail.com | Admin  | 1              | 1       | 0       | U059H0Z4PH6 | "실습보조강사 유기영" | "실습보조강사 유기영" |                      |
+| miroirs01 | miroirs01@gmail.com | Admin  | 1              | 1       | 0       | UXXXXXXXXXX | "실습보조강사 유기영" | "실습보조강사 유기영" |                      |
 
 startDate에는 과제 시작 날짜 및 시간, endDate에는 과제 마감 날짜 및 시간을 입력한다.
 
