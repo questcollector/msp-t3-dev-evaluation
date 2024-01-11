@@ -16,7 +16,14 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
+import org.springframework.boot.test.util.TestPropertyValues
+import org.springframework.context.ApplicationContextInitializer
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.utility.DockerImageName
 import reactor.test.StepVerifier
 import java.time.LocalDateTime
 import java.util.*
@@ -27,6 +34,7 @@ private const val TEST = "test"
 
 @ExperimentalCoroutinesApi
 @DataMongoTest
+@ContextConfiguration(initializers = [MongoDBContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @DisabledIfEnvironmentVariable(named = "GITHUB_ACTIONS", matches = "true")
@@ -88,4 +96,15 @@ class MessageDataRepositoryTests (
             .expectNext(entities[5])
             .verifyComplete()
     }
+}
+class MongoDBContainerInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
+    private val mongoDbContainer = MongoDBContainer(DockerImageName.parse("mongo:6.0.4"))
+    override fun initialize(applicationContext: ConfigurableApplicationContext) {
+        mongoDbContainer.start()
+        TestPropertyValues.of(
+            "spring.data.mongodb.host=" + mongoDbContainer.host,
+            "spring.data.mongodb.port=" + mongoDbContainer.getMappedPort(27017)
+        ).applyTo(applicationContext);
+    }
+
 }

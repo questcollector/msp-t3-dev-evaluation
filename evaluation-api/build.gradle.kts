@@ -12,6 +12,9 @@ plugins {
 group = "com.samsung.sds.t3.dev"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
+var mockkVersion = "1.13.4"
+var testcontainerVersion = "1.19.3"
+var springdocVersion = "2.0.2"
 
 repositories {
     mavenCentral()
@@ -27,14 +30,16 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("io.mockk:mockk:1.13.4")
+    testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 
     // mongodb
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
-//    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.9.2")
+    testImplementation("org.testcontainers:testcontainers:$testcontainerVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainerVersion")
+    testImplementation("org.testcontainers:mongodb:$testcontainerVersion")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.0.2")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
 
 }
 
