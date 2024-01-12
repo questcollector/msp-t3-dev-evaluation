@@ -82,7 +82,7 @@ class MessageDataCommandServiceTests {
     @Test
     fun `isPass = True 테스트`() {
         val message = org.springframework.messaging.support.MessageBuilder
-            .withPayload(SampleDTO())
+            .withPayload(SampleDTO(1, "test"))
             .setHeader("InstanceId", "i-02ee325b303f77f4f")
             .setHeader("IpAddress", "172.31.19.216")
             .setHeader("SlackUserId", "id")
@@ -105,7 +105,7 @@ class MessageDataCommandServiceTests {
     @Test
     fun `isPass = False, instanceId 없는 경우`() {
         val message = org.springframework.messaging.support.MessageBuilder
-            .withPayload(SampleDTO())
+            .withPayload(SampleDTO(1, "test"))
             .setHeader("InstanceId", null)
             .setHeader("IpAddress", "172.31.19.216")
             .setHeader("SlackUserId", "id")
@@ -128,7 +128,7 @@ class MessageDataCommandServiceTests {
     @Test
     fun `isPass = False, ipAddress 없는 경우`() {
         val message = org.springframework.messaging.support.MessageBuilder
-            .withPayload(SampleDTO())
+            .withPayload(SampleDTO(1, "test"))
             .setHeader("InstanceId", "i-02ee325b303f77f4f")
             .setHeader("IpAddress", null)
             .setHeader("SlackUserId", "id")
@@ -151,7 +151,7 @@ class MessageDataCommandServiceTests {
     @Test
     fun `isPass = False, slackUserName 없는 경우`() {
         val message = org.springframework.messaging.support.MessageBuilder
-            .withPayload(SampleDTO())
+            .withPayload(SampleDTO(1, "test"))
             .setHeader("InstanceId", "i-02ee325b303f77f4f")
             .setHeader("IpAddress", "172.31.19.216")
             .setHeader("SlackUserId", "id")
