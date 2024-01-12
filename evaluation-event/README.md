@@ -10,10 +10,7 @@
 
 ## 로컬에서 구동 시
 
-1. docker-compose-dev.yml로 rabbitmq, mongodb 실행
-2. rabbitmq metadata 적용
-3. `SLACK_BOT_TOKEN` 환경 변수 추가
-4. `--spring.profiles.active=dev` 옵션으로 실행
+1. [/REAMD.md #로컬에서 실행](../README.md#로컬에서-실행)
 
 ## 로컬에서 slack service 테스트 케이스 실행 시
 
