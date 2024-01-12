@@ -1,6 +1,6 @@
 package com.github.questcollector.evaluation.service
 
-import com.github.questcollector.evaluation.model.CampaignDTO
+import com.github.questcollector.evaluation.model.SampleDTO
 import com.github.questcollector.evaluation.repository.MessageDataRepository
 import com.github.questcollector.evaluation.repository.entity.MessageDataEntity
 import org.slf4j.Logger
@@ -27,12 +27,12 @@ class MessageDataCommandService (
     private val instanceIdRegex = Regex("i-[0-9a-z]{17}")
     private val ipAddressRegex = Regex("172\\.31\\.\\d{1,3}\\.\\d{1,3}")
 
-    suspend fun createMessageDataEntity(messageDataDTO: Message<CampaignDTO>): MessageDataEntity {
+    suspend fun createMessageDataEntity(messageDataDTO: Message<SampleDTO>): MessageDataEntity {
 
         log.info("createMessageDataEntity invoked")
 
         val headers: MessageHeaders = messageDataDTO.headers
-        val payload: CampaignDTO = messageDataDTO.payload
+        val payload: SampleDTO = messageDataDTO.payload
         val slackUserName: String? = headers["SlackUserId"]?.let {
             slackUserInfoService.getSlackUserNameWithSlackUserId(it as String)
         }

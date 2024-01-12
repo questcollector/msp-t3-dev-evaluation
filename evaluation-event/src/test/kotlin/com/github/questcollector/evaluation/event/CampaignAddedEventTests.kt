@@ -1,6 +1,6 @@
 package com.github.questcollector.evaluation.event
 
-import com.github.questcollector.evaluation.model.CampaignDTO
+import com.github.questcollector.evaluation.model.SampleDTO
 import com.github.questcollector.evaluation.repository.entity.MessageDataEntity
 import com.github.questcollector.evaluation.service.MessageDataCommandService
 import com.github.questcollector.evaluation.service.SlackMessagingService
@@ -26,9 +26,9 @@ class CampaignAddedEventTests {
     fun `consumer test`() {
 
         val campaigns = Flux.just(
-            CampaignDTO(campaignId = 1, campaignName = "name1"),
-            CampaignDTO(campaignId = 2, campaignName = "name2"),
-            CampaignDTO(campaignId = 3, campaignName = "name3")
+            SampleDTO(id = 1, name = "name1"),
+            SampleDTO(id = 2, name = "name2"),
+            SampleDTO(id = 3, name = "name3")
         ).map {
             MessageBuilder.withPayload(it).build()
         }
@@ -43,10 +43,10 @@ class CampaignAddedEventTests {
 
         coEvery { messageDataCommandService.createMessageDataEntity(any()) } coAnswers {
             println("handleMessage invoked")
-            val argumentMessage = this.arg<GenericMessage<CampaignDTO>>(0)
+            val argumentMessage = this.arg<GenericMessage<SampleDTO>>(0)
             assertThat(argumentMessage.payload)
-                .matches { it.campaignId in 1 ..< 3 }
-                .matches { it.campaignName in listOf("name1", "name2", "name3") }
+                .matches { it.id in 1 ..< 3 }
+                .matches { it.name in listOf("name1", "name2", "name3") }
             MessageDataEntity(isPass = false, payload = argumentMessage.payload.toString())
         }
 

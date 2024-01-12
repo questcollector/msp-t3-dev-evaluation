@@ -1,6 +1,6 @@
 package com.github.questcollector.evaluation.event
 
-import com.github.questcollector.evaluation.model.CampaignDTO
+import com.github.questcollector.evaluation.model.SampleDTO
 import com.github.questcollector.evaluation.repository.entity.MessageDataEntity
 import com.github.questcollector.evaluation.service.MessageDataCommandService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,14 +31,14 @@ class CampaignAddedEventBinderTests {
 
     @Test
     fun `campaignAddedEvent Binder test`() {
-        val payload = CampaignDTO(campaignId = 1, campaignName = "name1")
+        val payload = SampleDTO(id = 1, name = "name1")
         val inputMessage = GenericMessage(payload)
         val inputBinding = "campaignAddedEvent"
 
         runTest {
             given(messageDataCommandService.createMessageDataEntity(any()))
                 .willAnswer {
-                    val argument = it.getArgument(0) as GenericMessage<CampaignDTO>
+                    val argument = it.getArgument(0) as GenericMessage<SampleDTO>
                     println(argument)
                     assertThat(argument.payload).isEqualTo(payload)
                     MessageDataEntity(isPass = false, payload = argument.payload.toString())

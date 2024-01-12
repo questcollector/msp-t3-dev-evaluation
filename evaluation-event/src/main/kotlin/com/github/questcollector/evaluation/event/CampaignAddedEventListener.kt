@@ -1,6 +1,6 @@
 package com.github.questcollector.evaluation.event
 
-import com.github.questcollector.evaluation.model.CampaignDTO
+import com.github.questcollector.evaluation.model.SampleDTO
 import com.github.questcollector.evaluation.service.MessageDataCommandService
 import com.github.questcollector.evaluation.service.SlackMessagingService
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ class CampaignAddedEventListener (
     private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Bean
-    fun campaignAddedEvent(): Consumer<Flux<Message<CampaignDTO>>> = Consumer { message ->
+    fun campaignAddedEvent(): Consumer<Flux<Message<SampleDTO>>> = Consumer { message ->
         log.info("campaignAddedEvent invoked")
         message.concatMap {
             mono(Dispatchers.IO) { handleMessage(it) }
@@ -33,7 +33,7 @@ class CampaignAddedEventListener (
         }.subscribe()
     }
 
-    private suspend fun handleMessage(message: Message<CampaignDTO>) {
+    private suspend fun handleMessage(message: Message<SampleDTO>) {
 
         val entity = messageDataCommandService.createMessageDataEntity(message)
 
