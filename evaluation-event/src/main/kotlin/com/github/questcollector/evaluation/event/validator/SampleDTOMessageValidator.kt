@@ -16,7 +16,7 @@ class SampleDTOMessageValidator {
                 throw ConversionException("payload id is zero or below zero")
             }
             payload.name.isBlank() -> {
-                throw ConversionException("payload name length is below zero")
+                throw ConversionException("payload name length is blank")
             }
             else -> return MessageBuilder.createMessage(message.payload, message.headers)
         }
