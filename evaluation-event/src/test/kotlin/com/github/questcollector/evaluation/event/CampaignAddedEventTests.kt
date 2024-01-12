@@ -1,5 +1,6 @@
 package com.github.questcollector.evaluation.event
 
+import com.github.questcollector.evaluation.event.validator.SampleDTOMessageValidator
 import com.github.questcollector.evaluation.model.SampleDTO
 import com.github.questcollector.evaluation.repository.entity.MessageDataEntity
 import com.github.questcollector.evaluation.service.MessageDataCommandService
@@ -21,7 +22,7 @@ class CampaignAddedEventTests {
     private val messageDataCommandService = mockk<MessageDataCommandService>()
     private val slackMessagingService = mockk<SlackMessagingService>()
     private val notificationEventPublisher = mockk<NotificationEventPublisher>()
-
+    private val validator = mockk<SampleDTOMessageValidator>()
     @Test
     fun `consumer test`() {
 
@@ -35,10 +36,11 @@ class CampaignAddedEventTests {
 
         val campaignAddedEventListener = spyk(
             CampaignAddedEventListener(
-            messageDataCommandService,
-            slackMessagingService,
-            notificationEventPublisher
-        )
+                messageDataCommandService,
+                slackMessagingService,
+                notificationEventPublisher,
+                validator
+            )
         )
 
         coEvery { messageDataCommandService.createMessageDataEntity(any()) } coAnswers {
