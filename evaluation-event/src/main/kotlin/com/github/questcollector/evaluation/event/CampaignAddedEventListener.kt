@@ -1,5 +1,6 @@
 package com.github.questcollector.evaluation.event
 
+import com.github.questcollector.evaluation.event.validator.SampleDTOMessageValidator
 import com.github.questcollector.evaluation.model.SampleDTO
 import com.github.questcollector.evaluation.service.MessageDataCommandService
 import com.github.questcollector.evaluation.service.SlackMessagingService
@@ -18,7 +19,8 @@ import java.util.function.Consumer
 class CampaignAddedEventListener (
     private val messageDataCommandService: MessageDataCommandService,
     private val slackMessagingService: SlackMessagingService,
-    private val notificationEventPublisher: NotificationEventPublisher
+    private val notificationEventPublisher: NotificationEventPublisher,
+    private val validator: SampleDTOMessageValidator
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -26,7 +28,9 @@ class CampaignAddedEventListener (
     @Bean
     fun campaignAddedEvent(): Consumer<Flux<Message<SampleDTO>>> = Consumer { message ->
         log.info("campaignAddedEvent invoked")
-        message.concatMap {
+        message.doOnNext{
+            validator.validate(it)
+        }.concatMap {
             mono(Dispatchers.IO) { handleMessage(it) }
         }.onErrorContinue { e, _ ->
             log.error(e.message, e)

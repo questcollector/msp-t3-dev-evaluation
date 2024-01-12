@@ -1,10 +1,14 @@
 package com.github.questcollector.evaluation.model
 
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Positive
 import java.time.OffsetDateTime
 
 data class SampleDTO(
-    val id : Int? = 0,
-    val name: String? = null,
+    @Positive
+    val id : Int,
+    @NotBlank
+    val name: String,
     val description: String? = null,
     val startDate: OffsetDateTime? = null,
     val endDate: OffsetDateTime? = null,
